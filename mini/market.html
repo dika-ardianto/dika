@@ -1,994 +1,555 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MiniMart – Toko Serba Ada</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-<style>
-/* ===== RESET & BASE ===== */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d0f14;
-  --surface:#161a23;
-  --card:#1e2330;
-  --border:#2a2f3e;
-  --accent:#f5c518;
-  --accent2:#ff6b35;
-  --green:#4cde8e;
-  --red:#ff4d6d;
-  --text:#eef0f5;
-  --muted:#7a8099;
-  --radius:12px;
-  --shadow:0 8px 32px rgba(0,0,0,.45);
-}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;overflow-y:hidden}
-body.unlocked{overflow-y:auto}
-h1,h2,h3,h4{font-family:'Syne',sans-serif}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentDrive - Solusi Sewa Kendaraan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --dark: #0f172a;
+            --accent: #fbbf24;
+        }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar{width:6px}
-::-webkit-scrollbar-track{background:var(--surface)}
-::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+        }
 
-/* ===== TOAST ===== */
-#toast{position:fixed;bottom:28px;right:28px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
-.toast-msg{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--accent);padding:14px 20px;border-radius:var(--radius);font-size:.9rem;box-shadow:var(--shadow);animation:slideIn .3s ease;pointer-events:auto}
-.toast-msg.err{border-left-color:var(--red)}
-.toast-msg.ok{border-left-color:var(--green)}
-@keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes fadeOut{to{opacity:0;transform:translateX(110%)}}
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
 
-/* ===== SCREEN SYSTEM ===== */
-.screen{display:none !important;min-height:100vh;animation:fadeIn .4s ease}
-.screen.active{display:block !important}
-#screen-login.active{display:flex !important;align-items:center;justify-content:center}
-@keyframes fadeIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.3s ease;
+        }
 
-/* ===== LOGIN SCREEN ===== */
-#screen-login{background:radial-gradient(ellipse at 20% 50%,#1a2040 0%,var(--bg) 60%)}
-.login-wrap{width:100%;max-width:440px;padding:20px}
-.login-logo{text-align:center;margin-bottom:48px}
-.login-logo .brand{font-size:2.6rem;font-weight:800;letter-spacing:-1px;color:var(--text)}
-.login-logo .brand span{color:var(--accent)}
-.login-logo p{color:var(--muted);margin-top:6px;font-size:.95rem}
-.login-cards{display:grid;gap:16px}
-.login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;transition:all .25s;position:relative;overflow:visible}
-.login-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(245,197,24,.04));opacity:0;transition:.25s}
-.login-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 12px 40px rgba(245,197,24,.12)}
-.login-card:hover::before{opacity:1}
-.login-card .icon{font-size:2.2rem;margin-bottom:14px}
-.login-card h3{font-size:1.25rem;margin-bottom:6px}
-.login-card p{color:var(--muted);font-size:.88rem;line-height:1.5}
-.login-card .badge{display:inline-block;font-size:.72rem;background:rgba(245,197,24,.15);color:var(--accent);border-radius:20px;padding:2px 10px;margin-top:10px;font-weight:500}
-.admin-form{display:none;margin-top:20px;animation:fadeIn .3s ease}
-.admin-form.show{display:block}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:6px;font-weight:500}
-.field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s}
-.field input:focus{border-color:var(--accent)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:.9rem;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
-.btn-primary{background:var(--accent);color:#000}
-.btn-primary:hover{background:#ffd740;transform:translateY(-1px)}
-.btn-danger{background:rgba(255,77,109,.15);color:var(--red);border:1px solid rgba(255,77,109,.3)}
-.btn-danger:hover{background:rgba(255,77,109,.25)}
-.btn-success{background:rgba(76,222,142,.15);color:var(--green);border:1px solid rgba(76,222,142,.3)}
-.btn-success:hover{background:rgba(76,222,142,.25)}
-.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
-.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
-.btn-full{width:100%}
-.btn-sm{padding:7px 14px;font-size:.8rem}
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+        }
 
-/* ===== TOPBAR ===== */
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
-.topbar-inner{max-width:1200px;margin:0 auto;padding:0 24px;height:62px;display:flex;align-items:center;justify-content:space-between}
-.topbar-brand{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text)}
-.topbar-brand span{color:var(--accent)}
-.topbar-right{display:flex;align-items:center;gap:14px}
-.cart-btn{position:relative;background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.2);color:var(--accent);padding:9px 18px;border-radius:8px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;display:flex;align-items:center;gap:7px;transition:all .2s}
-.cart-btn:hover{background:rgba(245,197,24,.2)}
-.cart-count{background:var(--accent);color:#000;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700}
-.user-chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.82rem;color:var(--muted);display:flex;align-items:center;gap:6px}
-.logout-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size.85rem;padding:0;font-family:'DM Sans',sans-serif;transition:color .2s}
-.logout-btn:hover{color:var(--red)}
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
-/* ===== CUSTOMER SCREEN ===== */
-.main{max-width:1200px;margin:0 auto;padding:32px 24px}
-.page-title{font-size:1.8rem;font-weight:800;margin-bottom:6px}
-.page-sub{color:var(--muted);margin-bottom:28px;font-size:.92rem}
-.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
-.filter-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:20px;cursor:pointer;font-size:.84rem;transition:all .2s}
-.filter-btn:hover,.filter-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
-.search-wrap{position:relative;flex:1;min-width:200px}
-.search-wrap input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:9px 16px 9px 40px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
-.search-wrap input:focus{border-color:var(--accent)}
-.search-wrap .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:1rem}
-.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
-.product-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all .25s;position:relative}
-.product-card:hover{transform:translateY(-4px);border-color:rgba(245,197,24,.3);box-shadow:0 16px 40px rgba(0,0,0,.4)}
-.product-img{width:100%;height:130px;object-fit:cover;background:linear-gradient(135deg,#1e2330,#2a2f3e);display:flex;align-items:center;justify-content:center;font-size:3rem}
-.product-img img{width:100%;height:100%;object-fit:cover}
-.product-body{padding:14px}
-.product-cat{font-size:.72rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.product-name{font-size:.95rem;font-weight:600;margin-bottom:6px;line-height:1.3}
-.product-price{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--accent)}
-.product-stock{font-size:.76rem;color:var(--muted);margin-top:2px}
-.product-stock.low{color:var(--accent2)}
-.product-stock.empty{color:var(--red)}
-.product-actions{padding:0 14px 14px;display:flex;gap:8px;align-items:center}
-.qty-ctrl{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 8px}
-.qty-btn{background:none;border:none;color:var(--text);cursor:pointer;font-size:1.1rem;line-height:1;padding:0 3px;transition:color .15s}
-.qty-btn:hover{color:var(--accent)}
-.qty-val{font-family:'Syne',sans-serif;font-weight:700;min-width:22px;text-align:center;font-size:.95rem}
-.add-cart-btn{flex:1;background:var(--accent);color:#000;border:none;border-radius:8px;padding:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .2s}
-.add-cart-btn:hover{background:#ffd740}
-.add-cart-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed}
+        .modal-overlay {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+        }
 
-/* ===== CART SIDEBAR ===== */
-.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(4px)}
-.cart-overlay.open{opacity:1;pointer-events:all}
-.cart-sidebar{position:fixed;right:0;top:0;bottom:0;width:min(420px,100vw);background:var(--surface);border-left:1px solid var(--border);z-index:201;transform:translateX(100%);transition:.35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
-.cart-sidebar.open{transform:translateX(0)}
-.cart-head{padding:24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.cart-head h3{font-size:1.2rem}
-.close-btn{background:var(--card);border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.close-btn:hover{color:var(--red);border-color:var(--red)}
-.cart-items{flex:1;overflow-y:auto;padding:20px}
-.cart-empty{text-align:center;padding:60px 20px;color:var(--muted)}
-.cart-empty .ico{font-size:3rem;margin-bottom:12px}
-.cart-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
-.cart-item-name{font-weight:500;font-size:.9rem;flex:1;line-height:1.3}
-.cart-item-price{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--accent);white-space:nowrap}
-.cart-item-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
-.cart-item-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0;transition:color .2s}
-.cart-item-remove:hover{color:var(--red)}
-.cart-foot{padding:20px;border-top:1px solid var(--border)}
-.cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.cart-total-label{color:var(--muted);font-size:.9rem}
-.cart-total-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--accent)}
-.customer-name-field{margin-bottom:14px}
-.customer-name-field label{font-size:.8rem;color:var(--muted);display:block;margin-bottom:6px}
-.customer-name-field input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s}
-.customer-name-field input:focus{border-color:var(--accent)}
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        .admin-table th { padding: 12px; text-align: left; color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+        .admin-table td { padding: 16px; background: rgba(30, 41, 59, 0.5); }
+        .admin-table tr td:first-child { border-radius: 12px 0 0 12px; }
+        .admin-table tr td:last-child { border-radius: 0 12px 12px 0; }
 
-/* ===== ADMIN SCREEN ===== */
-.admin-tabs{display:flex;gap:0;background:var(--surface);border-bottom:1px solid var(--border)}
-.admin-tab{padding:16px 24px;cursor:pointer;font-family:'Syne',sans-serif;font-weight:600;font-size:.88rem;color:var(--muted);border-bottom:2px solid transparent;transition:all .2s}
-.admin-tab:hover{color:var(--text)}
-.admin-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.admin-panel{display:none}
-.admin-panel.active{display:block}
-.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:30px}
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
-.stat-card .val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.8rem;color:var(--accent)}
-.stat-card .lbl{font-size:.8rem;color:var(--muted);margin-top:4px}
-.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-table{width:100%;border-collapse:collapse}
-th{background:var(--surface);padding:12px 16px;text-align:left;font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
-td{padding:12px 16px;border-top:1px solid var(--border);font-size:.88rem;vertical-align:middle}
-tr:hover td{background:rgba(255,255,255,.02)}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.74rem;font-weight:600}
-.badge-ok{background:rgba(76,222,142,.15);color:var(--green)}
-.badge-warn{background:rgba(255,107,53,.15);color:var(--accent2)}
-.badge-err{background:rgba(255,77,109,.15);color:var(--red)}
-
-/* ===== MODAL ===== */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px)}
-.modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;width:min(480px,94vw);box-shadow:var(--shadow);animation:fadeIn .3s ease}
-.modal h3{font-size:1.3rem;margin-bottom:20px}
-.modal-foot{display:flex;gap:10px;margin-top:24px;justify-content:flex-end}
-
-/* ===== RECEIPT ===== */
-.receipt{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center}
-.receipt-logo{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:4px}
-.receipt-logo span{color:var(--accent)}
-.receipt-id{font-size:.78rem;color:var(--muted);margin-bottom:20px}
-.receipt-items{text-align:left;border-top:1px dashed var(--border);border-bottom:1px dashed var(--border);padding:14px 0;margin:16px 0}
-.receipt-row{display:flex;justify-content:space-between;font-size:.85rem;padding:3px 0}
-.receipt-total-row{display:flex;justify-content:space-between;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem}
-.receipt-thanks{margin-top:16px;font-size:.8rem;color:var(--muted)}
-
-/* ===== LOADING ===== */
-.loading-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:16px;color:var(--muted)}
-.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ===== CONFIG BANNER ===== */
-.config-banner{background:rgba(255,107,53,.08);border:1px solid rgba(255,107,53,.25);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;font-size:.88rem;line-height:1.6}
-.config-banner strong{color:var(--accent2)}
-.config-banner code{background:var(--card);padding:2px 7px;border-radius:4px;font-size:.82rem;color:var(--accent)}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:600px){
-  .products-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-  .main{padding:20px 14px}
-  .topbar-inner{padding:0 14px}
-}
-
-/* Admin card header hover */
-.admin-card-header{padding-bottom:4px;border-radius:8px;transition:opacity .2s}
-.admin-card-header:hover{opacity:.85}
-</style>
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-<div id="toast"></div>
-
-<!-- ===================== LOGIN SCREEN ===================== -->
-<div id="screen-login" class="screen active">
-  <div class="login-wrap">
-    <div class="login-logo">
-      <div class="brand">Mini<span>Mart</span></div>
-      <p>Pilih tipe akun untuk melanjutkan</p>
-    </div>
-    <div class="login-cards">
-  <!-- Pelanggan tetap sama -->
-  <div class="login-card" onclick="loginPelanggan()" style="cursor:pointer">
-    <div class="icon">🛒</div>
-    <h3>Masuk sebagai Pelanggan</h3>
-    <p>Browsing dan beli produk tanpa perlu akun.</p>
-    <div class="badge">Tanpa Login</div>
-  </div>
-
-  <!-- Bagian Admin yang Diperbaiki: Langsung tampilkan form -->
-  <div class="login-card">
-    <div class="icon">🔐</div>
-    <h3>Masuk sebagai Admin</h3>
-    <div class="admin-form show" id="admin-form" style="display: block; margin-top: 15px;">
-      <div class="field">
-        <label>Username</label>
-        <input type="text" id="adm-user" placeholder="admin" autocomplete="username"/>
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <input type="password" id="adm-pass" placeholder="••••••••" autocomplete="current-password"/>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="doAdminLogin()">Masuk Admin →</button>
-    </div>
-  </div>
-</div>
-    <p style="text-align:center;margin-top:20px;font-size:.78rem;color:var(--muted)">Default admin: <code style="color:var(--accent)">admin</code> / <code style="color:var(--accent)">admin123</code></p>
-  </div>
-</div>
-
-<!-- ===================== CUSTOMER SCREEN ===================== -->
-<div id="screen-customer" class="screen">
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="topbar-brand">Mini<span>Mart</span></div>
-      <div class="topbar-right">
-        <div class="user-chip">🛒 Pelanggan</div>
-        <button class="cart-btn" onclick="openCart()">
-          🛒 Keranjang <span class="cart-count" id="cart-count">0</span>
-        </button>
-        <button class="logout-btn" onclick="logout()">Keluar</button>
-      </div>
-    </div>
-  </div>
-  <div class="main">
-    <div id="config-warn-customer" class="config-banner" style="display:none">
-      ⚠️ <strong>Perlu Konfigurasi!</strong> Ganti <code>APPS_SCRIPT_URL</code> di bagian script dengan URL Google Apps Script kamu. <a href="#" style="color:var(--accent)" onclick="showSetupGuide()">Lihat panduan →</a>
-    </div>
-    <h2 class="page-title">Produk Kami</h2>
-    <p class="page-sub" id="customer-greeting">Selamat datang! Pilih produk yang kamu inginkan.</p>
-    <div class="filter-bar">
-      <div class="search-wrap">
-        <span class="ico">🔍</span>
-        <input type="text" id="search-input" placeholder="Cari produk..." oninput="filterProducts()"/>
-      </div>
-      <div id="category-filters"></div>
-    </div>
-    <div id="products-grid" class="products-grid">
-      <div class="loading-wrap"><div class="spinner"></div><span>Memuat produk...</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- Cart Sidebar -->
-<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
-<div class="cart-sidebar" id="cart-sidebar">
-  <div class="cart-head">
-    <h3>🛒 Keranjang Belanja</h3>
-    <button class="close-btn" onclick="closeCart()">✕</button>
-  </div>
-  <div class="cart-items" id="cart-items-list"></div>
-  <div class="cart-foot" id="cart-foot" style="display:none">
-    <div class="customer-name-field">
-      <label>Nama Pelanggan (opsional)</label>
-      <input type="text" id="customer-name" placeholder="Masukkan namamu..."/>
-    </div>
-    <div class="cart-total-row">
-      <span class="cart-total-label">Total Pembayaran</span>
-      <span class="cart-total-val" id="cart-total">Rp 0</span>
-    </div>
-    <button class="btn btn-primary btn-full" onclick="checkout()">Bayar Sekarang →</button>
-  </div>
-</div>
-
-<!-- ===================== ADMIN SCREEN ===================== -->
-<div id="screen-admin" class="screen">
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="topbar-brand">Mini<span>Mart</span> <span style="color:var(--muted);font-size:.75rem;font-weight:400">Admin Panel</span></div>
-      <div class="topbar-right">
-        <div class="user-chip">🔐 Admin</div>
-        <button class="logout-btn" onclick="logout()">Keluar</button>
-      </div>
-    </div>
-  </div>
-  <div class="admin-tabs">
-    <div class="admin-tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
-    <div class="admin-tab" onclick="switchTab('products')">📦 Produk</div>
-    <div class="admin-tab" onclick="switchTab('orders')">📋 Pesanan</div>
-  </div>
-  <div class="main">
-    <div id="config-warn-admin" class="config-banner" style="display:none">
-      ⚠️ <strong>Perlu Konfigurasi!</strong> Ganti <code>APPS_SCRIPT_URL</code> di bagian script dengan URL Google Apps Script kamu. <a href="#" style="color:var(--accent)" onclick="showSetupGuide()">Lihat panduan →</a>
-    </div>
-
-    <!-- Dashboard -->
-    <div class="admin-panel active" id="panel-dashboard">
-      <div class="stats-row" id="stats-row">
-        <div class="stat-card"><div class="val" id="stat-products">—</div><div class="lbl">Total Produk</div></div>
-        <div class="stat-card"><div class="val" id="stat-orders">—</div><div class="lbl">Total Pesanan</div></div>
-        <div class="stat-card"><div class="val" id="stat-revenue">—</div><div class="lbl">Total Omset</div></div>
-        <div class="stat-card"><div class="val" id="stat-low">—</div><div class="lbl">Stok Menipis</div></div>
-      </div>
-      <h3 style="margin-bottom:16px;font-size:1rem">Pesanan Terbaru</h3>
-      <div class="table-wrap"><div id="dashboard-orders"></div></div>
-    </div>
-
-    <!-- Products -->
-    <div class="admin-panel" id="panel-products">
-      <div class="admin-header">
-        <h2 class="page-title" style="margin:0">Manajemen Produk</h2>
-        <button class="btn btn-primary" onclick="openProductModal()">+ Tambah Produk</button>
-      </div>
-      <div class="table-wrap">
-        <table id="products-table">
-          <thead><tr><th>Nama</th><th>Kategori</th><th>Harga</th><th>Stok</th><th>Aksi</th></tr></thead>
-          <tbody id="products-tbody"><tr><td colspan="5" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Orders -->
-    <div class="admin-panel" id="panel-orders">
-      <div class="admin-header">
-        <h2 class="page-title" style="margin:0">Riwayat Pesanan</h2>
-        <button class="btn btn-ghost" onclick="loadOrders()">↻ Refresh</button>
-      </div>
-      <div class="table-wrap">
-        <table id="orders-table">
-          <thead><tr><th>ID Pesanan</th><th>Tanggal</th><th>Pelanggan</th><th>Item</th><th>Total</th><th>Status</th></tr></thead>
-          <tbody id="orders-tbody"><tr><td colspan="6" style="text-align:center;padding:40px"><div class="spinner" style="margin:0 auto"></div></td></tr></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ===================== MODALS ===================== -->
-<!-- Product Modal -->
-<div class="modal-overlay" id="product-modal">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h3 id="modal-title">Tambah Produk</h3>
-    <input type="hidden" id="modal-id"/>
-    <div class="field"><label>Nama Produk *</label><input type="text" id="modal-name" placeholder="Indomie Goreng"/></div>
-    <div class="field"><label>Kategori *</label><input type="text" id="modal-cat" placeholder="Mie Instan, Minuman, Snack..."/></div>
-    <div class="field"><label>Harga (Rp) *</label><input type="number" id="modal-price" placeholder="3500" min="0"/></div>
-    <div class="field"><label>Stok *</label><input type="number" id="modal-stock" placeholder="100" min="0"/></div>
-    <div class="field"><label>URL Gambar (opsional)</label><input type="text" id="modal-img" placeholder="https://..."/></div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeProductModal()">Batal</button>
-      <button class="btn btn-primary" onclick="saveProduct()">Simpan →</button>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Confirm -->
-<div class="modal-overlay" id="delete-modal">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h3>Hapus Produk?</h3>
-    <p style="color:var(--muted);margin-top:8px">Produk <strong id="delete-name" style="color:var(--text)"></strong> akan dihapus permanen dari database.</p>
-    <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeDeleteModal()">Batal</button>
-      <button class="btn btn-danger" onclick="confirmDelete()">Hapus</button>
-    </div>
-  </div>
-</div>
-
-<!-- Receipt Modal -->
-<div class="modal-overlay" id="receipt-modal">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="receipt">
-      <div class="receipt-logo">Mini<span>Mart</span></div>
-      <div class="receipt-id" id="receipt-id"></div>
-      <p style="font-size:.8rem;color:var(--muted)" id="receipt-date"></p>
-      <div class="receipt-items" id="receipt-items"></div>
-      <div class="receipt-total-row">
-        <span>TOTAL</span>
-        <span id="receipt-total"></span>
-      </div>
-      <div class="receipt-thanks">✨ Terima kasih sudah berbelanja!</div>
-    </div>
-    <div class="modal-foot" style="justify-content:center;margin-top:16px">
-      <button class="btn btn-primary" onclick="closeReceipt()">Tutup & Lanjut Belanja</button>
-    </div>
-  </div>
-</div>
-
-<!-- Setup Guide Modal -->
-<div class="modal-overlay" id="setup-modal">
-  <div class="modal" onclick="event.stopPropagation()" style="max-width:560px">
-    <h3>📋 Panduan Setup Google Apps Script</h3>
-    <div style="margin-top:16px;font-size:.88rem;line-height:1.8;color:var(--muted)">
-      <p><strong style="color:var(--text)">1.</strong> Buka <a href="https://script.google.com" target="_blank" style="color:var(--accent)">script.google.com</a> dan buat proyek baru.</p>
-      <p><strong style="color:var(--text)">2.</strong> Copy paste kode dari file <code style="color:var(--accent)">Code.gs</code> ke editor.</p>
-      <p><strong style="color:var(--text)">3.</strong> Klik <strong style="color:var(--text)">Deploy → New deployment → Web app</strong></p>
-      <p><strong style="color:var(--text)">4.</strong> Set <em>"Execute as"</em> = <strong>Me</strong>, <em>"Who has access"</em> = <strong>Anyone</strong></p>
-      <p><strong style="color:var(--text)">5.</strong> Klik Deploy, copy URL yang muncul.</p>
-      <p><strong style="color:var(--text)">6.</strong> Jalankan fungsi <code style="color:var(--accent)">initSheets()</code> sekali untuk membuat sheet otomatis.</p>
-      <p><strong style="color:var(--text)">7.</strong> Ganti nilai <code style="color:var(--accent)">APPS_SCRIPT_URL</code> di HTML ini dengan URL tersebut.</p>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-primary" onclick="document.getElementById('setup-modal').classList.remove('open')">Mengerti</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ============================================================
-//  KONFIGURASI — Ganti URL ini dengan URL Google Apps Script
-// ============================================================
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQcfUcd9zUXf2kA2VkjKBD5WyUBZnCcCaBkjz7hzx5cpwKhSSAfI4dA-DNG7IzH9M/exec";
-// ============================================================
-
-// ---------- STATE ----------
-let currentRole = null;
-let products    = [];
-let cart        = {};       // { productId: qty }
-let deleteTarget = null;
-let editingId   = null;
-let filterCat   = "Semua";
-
-// ---------- UTILS ----------
-function rupiah(n){ return "Rp " + Number(n).toLocaleString("id-ID") }
-function toast(msg, type="ok"){
-  const d = document.createElement("div");
-  d.className = "toast-msg " + type;
-  d.textContent = msg;
-  document.getElementById("toast").appendChild(d);
-  setTimeout(()=>{ d.style.animation = "fadeOut .3s ease forwards"; setTimeout(()=>d.remove(),300); }, 3000);
-}
-function showLoading(id){ document.getElementById(id).innerHTML = '<div class="loading-wrap"><div class="spinner"></div><span>Memuat...</span></div>'; }
-
-// ---------- API CALL ----------
-// Apps Script tidak support POST+JSON CORS dari browser.
-// Semua data dikirim via GET dengan payload JSON di query string.
-async function api(params){
-  try{
-    const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-    if(isConfig) throw new Error("URL belum dikonfigurasi");
-    const payload = encodeURIComponent(JSON.stringify(params));
-    const url = APPS_SCRIPT_URL + "?action=" + params.action + "&payload=" + payload;
-    const res = await fetch(url, { method:"GET", redirect:"follow" });
-    const text = await res.text();
-    return JSON.parse(text);
-  } catch(err){
-    console.error(err);
-    return { ok: false, message: err.message };
-  }
-}
-
-// ---------- SCREENS ----------
-function show(id){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
-  document.getElementById("screen-"+id).classList.add("active");
-  window.scrollTo({top:0,behavior:"instant"});
-  if(id==="login"){ document.body.classList.remove("unlocked"); }
-  else { document.body.classList.add("unlocked"); }
-}
-
-function checkConfig(){
-  const isDemo = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  if(isDemo){
-    document.getElementById("config-warn-customer").style.display = "block";
-    document.getElementById("config-warn-admin").style.display    = "block";
-    loadDemoProducts();
-  }
-  return !isDemo;
-}
-
-// ---------- LOGIN ----------
-function loginPelanggan(){
-  currentRole = "customer";
-  show("customer");
-  checkConfig() ? loadProducts() : null;
-}
-
-function toggleAdminForm(){
-  const f    = document.getElementById("admin-form");
-  const hint = document.getElementById("toggle-hint");
-  const isOpen = f.classList.contains("show");
-  if(isOpen){
-    f.classList.remove("show");
-    if(hint) hint.textContent = "▼ Klik untuk login";
-  } else {
-    f.classList.add("show");
-    if(hint) hint.textContent = "▲ Tutup";
-    setTimeout(()=>{ const u=document.getElementById("adm-user"); if(u) u.focus(); },50);
-  }
-}
-
-async function doAdminLogin(){
-  const username = document.getElementById("adm-user").value.trim();
-  const password = document.getElementById("adm-pass").value;
-  if(!username || !password){ toast("Isi username dan password!", "err"); return; }
-
-  const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  let ok = false;
-
-  if(isConfig){
-    // Demo mode: hardcoded check
-    ok = (username === "admin" && password === "admin123");
-  } else {
-    const res = await api({ action:"adminLogin", username, password });
-    ok = res.ok;
-    if(!ok){ toast(res.message || "Login gagal", "err"); return; }
-  }
-
-  if(ok){
-    currentRole = "admin";
-    show("admin");
-    checkConfig();
-    loadAdminData();
-    toast("Selamat datang, Admin! 🎉");
-  } else {
-    toast("Username atau password salah!", "err");
-  }
-}
-
-function logout(){
-  currentRole = null;
-  cart = {};
-  products = [];
-  document.getElementById("admin-form").classList.remove("show");
-  document.getElementById("adm-user").value = "";
-  document.getElementById("adm-pass").value = "";
-  show("login");
-}
-
-// ---------- DEMO PRODUCTS ----------
-function loadDemoProducts(){
-  products = [
-    {id:"P1",name:"Indomie Goreng",category:"Mie Instan",price:3500,stock:100,image:""},
-    {id:"P2",name:"Aqua 600ml",category:"Minuman",price:4000,stock:80,image:""},
-    {id:"P3",name:"Roti Tawar Sari Roti",category:"Roti & Kue",price:12000,stock:30,image:""},
-    {id:"P4",name:"Sunlight 200ml",category:"Sabun & Kebersihan",price:8500,stock:50,image:""},
-    {id:"P5",name:"Pocari Sweat 500ml",category:"Minuman",price:8000,stock:60,image:""},
-    {id:"P6",name:"Teh Botol Sosro",category:"Minuman",price:5000,stock:75,image:""},
-    {id:"P7",name:"Chitato Original",category:"Snack",price:10000,stock:40,image:""},
-    {id:"P8",name:"Susu Ultra Full Cream",category:"Susu & Dairy",price:7500,stock:45,image:""},
-    {id:"P9",name:"Sabun Lifebuoy",category:"Sabun & Kebersihan",price:5500,stock:5,image:""},
-    {id:"P10",name:"Beras 5kg Premium",category:"Bahan Pokok",price:65000,stock:0,image:""},
-  ];
-  renderProducts();
-  if(currentRole==="admin") renderProductsTable();
-}
-
-// ---------- LOAD PRODUCTS ----------
-async function loadProducts(){
-  document.getElementById("products-grid").innerHTML = '<div class="loading-wrap"><div class="spinner"></div><span>Memuat produk...</span></div>';
-  const res = await api({ action:"getProducts" });
-  if(res.ok){ products = res.products; }
-  renderProducts();
-}
-
-function getEmoji(cat){
-  const m = { "Mie Instan":"🍜","Minuman":"🥤","Roti & Kue":"🍞","Sabun & Kebersihan":"🧼","Snack":"🍪","Susu & Dairy":"🥛","Bahan Pokok":"🌾" };
-  return m[cat] || "🏪";
-}
-
-function renderProducts(){
-  const search = (document.getElementById("search-input")?.value || "").toLowerCase();
-  const cats   = ["Semua", ...new Set(products.map(p=>p.category))];
-
-  // Category filters
-  const cf = document.getElementById("category-filters");
-  cf.innerHTML = cats.map(c=>`<button class="filter-btn ${filterCat===c?'active':''}" onclick="setFilter('${c}')">${c}</button>`).join("");
-
-  // Filter
-  let list = products;
-  if(filterCat !== "Semua") list = list.filter(p=>p.category===filterCat);
-  if(search) list = list.filter(p=>p.name.toLowerCase().includes(search)||p.category.toLowerCase().includes(search));
-
-  const grid = document.getElementById("products-grid");
-  if(!list.length){ grid.innerHTML = '<div style="text-align:center;padding:60px;color:var(--muted)">🔍 Produk tidak ditemukan</div>'; return; }
-
-  grid.innerHTML = list.map(p=>{
-    const qty   = cart[p.id] || 0;
-    const empty = Number(p.stock) === 0;
-    const low   = Number(p.stock) > 0 && Number(p.stock) <= 5;
-    const stockLabel = empty ? `<span class="product-stock empty">Stok habis</span>` :
-                       low   ? `<span class="product-stock low">⚠️ Stok: ${p.stock}</span>` :
-                               `<span class="product-stock">Stok: ${p.stock}</span>`;
-    return `
-    <div class="product-card">
-      <div class="product-img">${p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.textContent='${getEmoji(p.category)}'"/>` : getEmoji(p.category)}</div>
-      <div class="product-body">
-        <div class="product-cat">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-price">${rupiah(p.price)}</div>
-        ${stockLabel}
-      </div>
-      <div class="product-actions">
-        <div class="qty-ctrl">
-          <button class="qty-btn" onclick="changeQty('${p.id}',-1)" ${qty===0?'disabled':''}>−</button>
-          <span class="qty-val">${qty}</span>
-          <button class="qty-btn" onclick="changeQty('${p.id}',1)" ${empty||qty>=p.stock?'disabled':''}>+</button>
+    <!-- Loading Overlay -->
+    <div id="loader" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 hidden">
+        <div class="text-center">
+            <div class="loading-spinner mb-4 mx-auto"></div>
+            <p class="text-sm text-slate-400">Memproses data...</p>
         </div>
-        <button class="add-cart-btn" onclick="addToCart('${p.id}')" ${empty?'disabled':''}>
-          ${empty ? 'Habis' : '+ Keranjang'}
-        </button>
-      </div>
-    </div>`}).join("");
-}
+    </div>
 
-function setFilter(cat){ filterCat = cat; renderProducts(); }
-function filterProducts(){ renderProducts(); }
+    <!-- Auth Section -->
+    <div id="authSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
+        <div class="w-full max-w-md p-8 glass-card rounded-3xl shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
+                    <i class="fas fa-car-side text-3xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold">RentDrive</h1>
+                <p class="text-slate-400 mt-2">Masuk untuk mulai menyewa</p>
+            </div>
 
-function changeQty(id, delta) {
-  // Pastikan data produk sudah ada
-  const p = products.find(x => String(x.id) === String(id));
-  if (!p) return;
+            <div class="space-y-4">
+                <div id="userFields">
+                    <label class="block text-sm font-medium mb-1">Nama Lengkap</label>
+                    <input type="text" id="loginName" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Nama Anda">
+                    
+                    <label class="block text-sm font-medium mt-4 mb-1">Asal Kota</label>
+                    <input type="text" id="loginCity" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Kota Domisili">
+                </div>
 
-  const currentQty = cart[id] || 0;
-  const stockAvailable = Number(p.stock);
+                <div id="adminFields" class="hidden">
+                    <label class="block text-sm font-medium mb-1">Kode Akses Dev</label>
+                    <input type="password" id="adminPass" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Kode Admin">
+                </div>
 
-  // Hitung jumlah baru
-  let newQty = currentQty + delta;
+                <button id="loginBtn" onclick="handleLogin()" class="w-full btn-primary py-4 rounded-xl font-bold text-lg">
+                    Masuk Sekarang
+                </button>
 
-  // Validasi: tidak boleh kurang dari 0 dan tidak boleh melebihi stok
-  if (newQty < 0) newQty = 0;
-  if (newQty > stockAvailable) {
-    newQty = stockAvailable;
-    toast("Stok tidak mencukupi", "err");
-  }
+                <div class="flex justify-between items-center text-sm pt-4 border-t border-slate-800">
+                    <button onclick="toggleLoginMode('user')" id="btnToUser" class="text-blue-400 font-semibold hidden">Kembali ke Penyewa</button>
+                    <button onclick="toggleLoginMode('admin')" id="btnToAdmin" class="text-slate-400 hover:text-white">Akses Admin?</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  if (newQty === 0) {
-    delete cart[id];
-  } else {
-    cart[id] = newQty;
-  }
+    <!-- Main Content -->
+    <div id="mainApp" class="hidden pb-20">
+        <!-- Navigation -->
+        <nav class="sticky top-0 z-40 glass-card px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-car-side text-blue-500 text-2xl"></i>
+                <span class="font-bold text-xl tracking-tight">RentDrive</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                    <p id="navUserName" class="font-semibold text-sm leading-none"></p>
+                    <span id="navUserRole" class="text-[10px] uppercase tracking-widest text-blue-400">Penyewa</span>
+                </div>
+                <button onclick="logout()" class="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </nav>
 
-  updateCartCount();
-  renderProducts(); // Render ulang untuk update angka di tombol
-}
+        <!-- Admin Only Dashboard Section -->
+        <section id="adminDashboard" class="hidden px-6 mt-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Dashboard Admin</h2>
+                <div class="flex gap-2">
+                    <button onclick="showAdminView('inventory')" class="px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Produk</button>
+                    <button onclick="showAdminView('history')" class="px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Riwayat Sewa</button>
+                </div>
+            </div>
 
-function addToCart(id) {
-  // Pastikan ID dikonversi ke string agar cocok dengan data dari database/array
-  const productId = String(id);
-  const p = products.find(x => String(x.id) === productId);
-  
-  if (!p || Number(p.stock) <= 0) {
-    toast("Stok habis atau produk tidak ditemukan!", "err");
-    return;
-  }
-  
-  // Tambah qty di objek cart
-  cart[productId] = (cart[productId] || 0) + 1;
-  
-  toast(`${p.name} berhasil ditambah!`);
-  updateCartCount();
-  renderProducts(); // Update tampilan angka di tombol +1
-  if(document.getElementById("cart-sidebar").classList.contains("open")) {
-    renderCart(); // Update isi keranjang jika sidebar sedang terbuka
-  }
-}
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-card p-6 rounded-3xl border-l-4 border-blue-500">
+                    <p class="text-slate-400 text-xs uppercase mb-1">Total Unit Kendaraan</p>
+                    <h4 id="statTotalMobil" class="text-3xl font-bold">0</h4>
+                </div>
+                <div class="glass-card p-6 rounded-3xl border-l-4 border-green-500">
+                    <p class="text-slate-400 text-xs uppercase mb-1">Pesanan Masuk</p>
+                    <h4 id="statTotalOrder" class="text-3xl font-bold">0</h4>
+                </div>
+                <div class="glass-card p-6 rounded-3xl border-l-4 border-amber-500">
+                    <p class="text-slate-400 text-xs uppercase mb-1">Total Pendapatan</p>
+                    <h4 id="statTotalUang" class="text-3xl font-bold">Rp 0</h4>
+                </div>
+            </div>
 
-// Fungsi pendukung untuk update angka di badge tombol
-function updateCartCount(){
-  const n = Object.values(cart).reduce((a, b) => a + b, 0);
-  const countElem = document.getElementById("cart-count");
-  if(countElem) countElem.textContent = n;
-}
+            <!-- View: History Sewa -->
+            <div id="viewHistory" class="hidden glass-card rounded-3xl p-6 overflow-x-auto">
+                <h3 class="font-bold mb-4">Daftar Riwayat Penyewa</h3>
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Penyewa</th>
+                            <th>Kota</th>
+                            <th>Kendaraan</th>
+                            <th>Durasi</th>
+                            <th>Tanggal</th>
+                            <th>Total Biaya</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <!-- Data row -->
+                    </tbody>
+                </table>
+            </div>
 
-function openCart(){
-  document.getElementById("cart-overlay").classList.add("open");
-  document.getElementById("cart-sidebar").classList.add("open");
-  renderCart();
-}
+            <!-- View: Inventory (CRUD) -->
+            <div id="viewInventory" class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold">Katalog Kendaraan</h3>
+                    <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold">+ Unit Baru</button>
+                </div>
+                <div id="adminVehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Cards with Edit/Delete -->
+                </div>
+            </div>
+        </section>
 
-function closeCart(){
-  document.getElementById("cart-overlay").classList.remove("open");
-  document.getElementById("cart-sidebar").classList.remove("open");
-}
+        <!-- User View: Catalog -->
+        <section id="userCatalog" class="px-6 py-8">
+            <h2 class="text-2xl font-bold mb-6">Pilih Kendaraan Anda</h2>
+            <div id="vehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- User Cards -->
+            </div>
+        </section>
+    </div>
 
-function renderCart(){
-  const keys = Object.keys(cart);
-  const list = document.getElementById("cart-items-list");
-  const foot = document.getElementById("cart-foot");
+    <!-- Modal Konfirmasi Sewa (Penyewa) -->
+    <div id="bookingModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="glass-card w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Konfirmasi Sewa</h3>
+                <button onclick="closeBookingModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div id="bookingDetail" class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                    <!-- Dinamis Info Mobil -->
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-2">Berapa hari Anda akan menyewa?</label>
+                    <div class="flex items-center gap-4">
+                        <button onclick="updateDays(-1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700">-</button>
+                        <input type="number" id="rentalDays" value="1" min="1" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-center text-lg font-bold outline-none" oninput="calculateTotal()">
+                        <button onclick="updateDays(1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700">+</button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                    <span class="text-slate-400">Total Biaya:</span>
+                    <span id="totalBookingPrice" class="text-2xl font-bold text-blue-500">Rp 0</span>
+                </div>
+            </div>
+            <div class="p-6 bg-slate-900/50 flex flex-col gap-3">
+                <button id="btnConfirmOrder" onclick="confirmOrder()" class="w-full btn-primary py-3 rounded-xl font-bold">Konfirmasi & Kirim Pesanan</button>
+                <button onclick="closeBookingModal()" class="w-full py-2 text-sm text-slate-400 hover:text-white">Batal</button>
+            </div>
+        </div>
+    </div>
 
-  if(!keys.length){
-    list.innerHTML = '<div class="cart-empty"><div class="ico">🛒</div><p>Keranjang masih kosong</p></div>';
-    if(foot) foot.style.display = "none"; 
-    return;
-  }
+    <!-- Modal CRUD (Admin) -->
+    <div id="vehicleModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-xl font-bold">Detail Unit</h3>
+                <button onclick="closeVehicleModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <input type="text" id="vImg" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm" placeholder="URL Foto Kendaraan">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="vMerk" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm" placeholder="Merk (Contoh: Toyota)">
+                        <input type="text" id="vTipe" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm" placeholder="Tipe (Contoh: Avanza)">
+                        <input type="number" id="vTahun" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm" placeholder="Tahun">
+                        <input type="number" id="vHarga" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-sm" placeholder="Harga Sewa / Hari">
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-slate-800 flex justify-end gap-3">
+                <button id="btnSaveVehicle" onclick="saveVehicle()" class="btn-primary px-8 py-2 rounded-xl text-sm font-bold">Simpan</button>
+            </div>
+        </div>
+    </div>
 
-  let total = 0;
-  list.innerHTML = keys.map(id => {
-    const p = products.find(x => String(x.id) === String(id));
-    if (!p) return ""; // Skip jika produk tidak ada
-    
-    const qty = cart[id];
-    const sub = p.price * qty;
-    total += sub;
-    
-    return `
-    <div class="cart-item">
-      <div style="flex:1">
-        <div class="cart-item-name">${p.name}</div>
-        <div class="cart-item-sub">${qty} × ${rupiah(p.price)}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="cart-item-price">${rupiah(sub)}</span>
-        <button class="cart-item-remove" onclick="removeFromCart('${id}')">✕</button>
-      </div>
-    </div>`;
-  }).join("");
+    <script>
+        // API CONFIGURATION
+        const API_URL = "https://script.google.com/macros/s/AKfycbzn-vsPlSIZDVKjE1ry1jUU1NRxdYCOVUsYheh2J_Awsf0yOznf1eQ0_cXD_zq0tjMZuA/exec";
 
-  const totalElem = document.getElementById("cart-total");
-  if(totalElem) totalElem.textContent = rupiah(total);
-  if(foot) foot.style.display = "block";
-}
+        let dbVehicles = [];
+        let dbHistory = [];
+        let currentUser = null;
+        let loginMode = 'user';
+        let editingId = null;
+        let selectedVehicle = null;
 
-function removeFromCart(id){ delete cart[id]; updateCartCount(); renderCart(); renderProducts(); }
+        // --- FETCH UTILS ---
+        async function fetchAPI(action, method = 'GET', body = null) {
+            showLoader(true);
+            try {
+                let url = `${API_URL}?action=${action}`;
+                const options = {
+                    method: method,
+                    mode: 'no-cors' // Penting untuk Apps Script Web App
+                };
 
-async function checkout(){
-  const keys = Object.keys(cart);
-  if(!keys.length){ toast("Keranjang kosong!", "err"); return; }
+                if (method === 'POST') {
+                    options.body = JSON.stringify({ action, ...body });
+                }
 
-  const items   = keys.map(id=>{ const p=products.find(x=>x.id===id); return {id,name:p.name,qty:cart[id],price:p.price}; });
-  const total   = items.reduce((a,b)=>a+b.qty*b.price,0);
-  const customer= document.getElementById("customer-name").value.trim() || "Pelanggan";
+                // Karena no-cors, kita tidak bisa baca respons langsung untuk POST.
+                // Untuk GET, kita butuh data, jadi kita tetap pakai default cors jika memungkinkan atau proxy.
+                // Untuk demo ini, kita asumsikan GET bisa jalan (Apps Script mendukung JSONP/CORS GET).
+                
+                if (method === 'GET') {
+                    const response = await fetch(url);
+                    const json = await response.json();
+                    return json;
+                } else {
+                    // Untuk POST (no-cors), kita asumsikan berhasil karena Apps Script memprosesnya
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify({ action, ...body })
+                    });
+                    return { status: 'success' };
+                }
+            } catch (error) {
+                console.error("API Error:", error);
+                return null;
+            } finally {
+                showLoader(false);
+            }
+        }
 
-  const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  let orderId = "ORD-DEMO-" + Date.now();
+        function showLoader(show) {
+            document.getElementById('loader').classList.toggle('hidden', !show);
+        }
 
-  if(!isConfig){
-    const res = await api({ action:"checkout", customer, items, total });
-    if(!res.ok){ toast(res.message || "Checkout gagal!", "err"); return; }
-    orderId = res.orderId;
-    await loadProducts(); // Refresh stok
-  } else {
-    // Demo: kurangi stok lokal
-    items.forEach(item=>{ const p=products.find(x=>x.id===item.id); if(p) p.stock=Math.max(0,Number(p.stock)-item.qty); });
-  }
+        // --- DATA LOADING ---
+        async function loadInitialData() {
+            const products = await fetchAPI('getProducts');
+            if (products) dbVehicles = products;
 
-  // Tampilkan struk
-  showReceipt(orderId, customer, items, total);
-  cart = {};
-  updateCartCount();
-  closeCart();
-  renderProducts();
-}
+            const rentals = await fetchAPI('getRentals');
+            if (rentals) dbHistory = rentals;
 
-function showReceipt(orderId, customer, items, total){
-  document.getElementById("receipt-id").textContent = orderId;
-  document.getElementById("receipt-date").textContent = new Date().toLocaleString("id-ID");
-  document.getElementById("receipt-items").innerHTML = `
-    <div class="receipt-row" style="font-size:.78rem;color:var(--muted);margin-bottom:6px"><span>Pelanggan: ${customer}</span></div>
-    ${items.map(i=>`<div class="receipt-row"><span>${i.name} ×${i.qty}</span><span>${rupiah(i.qty*i.price)}</span></div>`).join("")}
-  `;
-  document.getElementById("receipt-total").textContent = rupiah(total);
-  document.getElementById("receipt-modal").classList.add("open");
-}
+            if (currentUser && currentUser.role === 'Developer') {
+                showAdminView('inventory');
+            } else if (currentUser) {
+                renderUserCatalog();
+            }
+        }
 
-function closeReceipt(){ document.getElementById("receipt-modal").classList.remove("open"); }
+        // --- CORE FUNCTIONS ---
+        function toggleLoginMode(mode) {
+            loginMode = mode;
+            document.getElementById('userFields').classList.toggle('hidden', mode === 'admin');
+            document.getElementById('adminFields').classList.toggle('hidden', mode === 'user');
+            document.getElementById('btnToAdmin').classList.toggle('hidden', mode === 'admin');
+            document.getElementById('btnToUser').classList.toggle('hidden', mode === 'user');
+        }
 
-// ---------- ADMIN ----------
-async function loadAdminData(){
-  await loadProductsAdmin();
-  await loadOrders();
-  updateDashboard();
-}
+        async function handleLogin() {
+            if (loginMode === 'user') {
+                const n = document.getElementById('loginName').value;
+                const c = document.getElementById('loginCity').value;
+                if (!n || !c) return alert("Isi Nama & Kota Anda");
+                currentUser = { name: n, city: c, role: 'Penyewa' };
+            } else {
+                if (document.getElementById('adminPass').value !== '12345') return alert("Kode Akses Salah!");
+                currentUser = { name: 'Admin Dev', city: 'Pusat', role: 'Developer' };
+            }
+            
+            await loadInitialData();
+            initApp();
+        }
 
-async function loadProductsAdmin(){
-  const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  if(isConfig){ if(!products.length) loadDemoProducts(); else renderProductsTable(); return; }
-  const res = await api({ action:"getProducts" });
-  if(res.ok){ products = res.products; renderProductsTable(); }
-}
+        function initApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('navUserName').textContent = currentUser.name;
+            document.getElementById('navUserRole').textContent = currentUser.role;
 
-function renderProductsTable(){
-  const tbody = document.getElementById("products-tbody");
-  if(!products.length){ tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Belum ada produk</td></tr>`; return; }
-  tbody.innerHTML = products.map(p=>`
-    <tr>
-      <td><strong>${p.name}</strong></td>
-      <td><span class="badge badge-ok">${p.category}</span></td>
-      <td>${rupiah(p.price)}</td>
-      <td>${Number(p.stock)<=0?`<span style="color:var(--red)">${p.stock} (Habis)</span>`:Number(p.stock)<=5?`<span style="color:var(--accent2)">${p.stock} (Menipis)</span>`:p.stock}</td>
-      <td><div style="display:flex;gap:8px">
-        <button class="btn btn-ghost btn-sm" onclick="openProductModal(${JSON.stringify(p).replace(/"/g,"&quot;")})">✏️ Edit</button>
-        <button class="btn btn-danger btn-sm" onclick="openDeleteModal('${p.id}','${p.name.replace(/'/g,"\\'")}')">🗑️ Hapus</button>
-      </div></td>
-    </tr>`).join("");
-}
+            if (currentUser.role === 'Developer') {
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                document.getElementById('userCatalog').classList.add('hidden');
+                showAdminView('inventory');
+            } else {
+                document.getElementById('adminDashboard').classList.add('hidden');
+                document.getElementById('userCatalog').classList.remove('hidden');
+                renderUserCatalog();
+            }
+        }
 
-let allOrders = [];
-async function loadOrders(){
-  const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  if(isConfig){ renderOrdersTable([]); return; }
-  const res = await api({ action:"getOrders" });
-  if(res.ok){ allOrders = res.orders; renderOrdersTable(allOrders); updateDashboard(); }
-}
+        // --- VIEW ADMIN LOGIC ---
+        async function showAdminView(view) {
+            document.getElementById('viewInventory').classList.toggle('hidden', view !== 'inventory');
+            document.getElementById('viewHistory').classList.toggle('hidden', view !== 'history');
+            
+            if (view === 'inventory') renderAdminInventory();
+            if (view === 'history') {
+                // Refresh history data
+                const rentals = await fetchAPI('getRentals');
+                if (rentals) dbHistory = rentals;
+                renderAdminHistory();
+            }
+            updateAdminStats();
+        }
 
-function renderOrdersTable(orders){
-  const tbody = document.getElementById("orders-tbody");
-  const dbody = document.getElementById("dashboard-orders");
+        function renderAdminInventory() {
+            const grid = document.getElementById('adminVehicleGrid');
+            grid.innerHTML = dbVehicles.map(v => `
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-4">
+                    <img src="${v.img}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm">${v.merk} ${v.tipe}</h4>
+                        <p class="text-xs text-slate-400">Rp ${parseInt(v.harga).toLocaleString()}/hari</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="openEditModal(${v.id})" class="text-blue-400 p-2"><i class="fas fa-edit text-xs"></i></button>
+                        <button onclick="deleteVehicle(${v.id})" class="text-red-400 p-2"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  if(!orders.length){
-    const empty = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Belum ada pesanan</td></tr>`;
-    if(tbody) tbody.innerHTML = empty;
-    if(dbody) dbody.innerHTML = '<table><thead><tr><th>ID</th><th>Pelanggan</th><th>Total</th><th>Status</th></tr></thead><tbody>'+empty+'</tbody></table>';
-    return;
-  }
+        function renderAdminHistory() {
+            const body = document.getElementById('historyTableBody');
+            body.innerHTML = dbHistory.map(h => `
+                <tr>
+                    <td><div class="font-bold">${h.nama}</div></td>
+                    <td><div class="text-slate-400 text-xs">${h.kota}</div></td>
+                    <td><span class="text-blue-400 font-bold">${h.kendaraan}</span></td>
+                    <td>${h.durasi || '-'} hari</td>
+                    <td class="text-xs text-slate-500">${h.tanggal}</td>
+                    <td class="font-bold text-green-400">Rp ${parseInt(h.total_harga || 0).toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
 
-  const rows = [...orders].reverse().map(o=>{
-    let items = [];
-    try{ items = JSON.parse(o.items); }catch(_){}
-    return `<tr>
-      <td><code style="font-size:.78rem;color:var(--accent)">${o.orderId}</code></td>
-      <td>${o.date}</td>
-      <td>${o.customer}</td>
-      <td>${items.map(i=>`${i.name}×${i.qty}`).join(", ")}</td>
-      <td>${rupiah(o.total)}</td>
-      <td><span class="badge badge-ok">${o.status}</span></td>
-    </tr>`;
-  }).join("");
+        function updateAdminStats() {
+            document.getElementById('statTotalMobil').textContent = dbVehicles.length;
+            document.getElementById('statTotalOrder').textContent = dbHistory.length;
+            const total = dbHistory.reduce((acc, curr) => acc + parseInt(curr.total_harga || 0), 0);
+            document.getElementById('statTotalUang').textContent = "Rp " + total.toLocaleString();
+        }
 
-  if(tbody) tbody.innerHTML = rows;
+        // --- USER & SEWA LOGIC ---
+        function renderUserCatalog() {
+            const grid = document.getElementById('vehicleGrid');
+            grid.innerHTML = dbVehicles.map(v => `
+                <div class="glass-card rounded-3xl overflow-hidden group">
+                    <div class="h-40 overflow-hidden">
+                        <img src="${v.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
+                    </div>
+                    <div class="p-5">
+                        <h4 class="font-bold text-lg">${v.merk} ${v.tipe}</h4>
+                        <p class="text-slate-500 text-xs mb-1 italic">${v.tahun}</p>
+                        <p class="text-blue-400 font-bold text-sm mb-4">Rp ${parseInt(v.harga).toLocaleString()}/hari</p>
+                        <button onclick="openBookingModal(${v.id})" class="w-full py-3 rounded-xl btn-primary text-white transition-all text-xs font-bold">
+                            SEWA SEKARANG
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  // Dashboard recent 5
-  const recent = [...orders].reverse().slice(0,5);
-  if(dbody) dbody.innerHTML = `<table><thead><tr><th>ID Pesanan</th><th>Pelanggan</th><th>Total</th><th>Status</th></tr></thead><tbody>
-    ${recent.map(o=>`<tr>
-      <td><code style="font-size:.78rem;color:var(--accent)">${o.orderId}</code></td>
-      <td>${o.customer}</td>
-      <td>${rupiah(o.total)}</td>
-      <td><span class="badge badge-ok">${o.status}</span></td>
-    </tr>`).join("")}
-  </tbody></table>`;
-}
+        function openBookingModal(id) {
+            selectedVehicle = dbVehicles.find(v => v.id == id);
+            const detail = document.getElementById('bookingDetail');
+            detail.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <img src="${selectedVehicle.img}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+                    <div>
+                        <h4 class="font-bold">${selectedVehicle.merk} ${selectedVehicle.tipe}</h4>
+                        <p class="text-xs text-slate-400">Tarif Harian: Rp ${parseInt(selectedVehicle.harga).toLocaleString()}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('rentalDays').value = 1;
+            calculateTotal();
+            document.getElementById('bookingModal').classList.remove('hidden');
+        }
 
-function updateDashboard(){
-  document.getElementById("stat-products").textContent = products.length;
-  document.getElementById("stat-orders").textContent   = allOrders.length;
-  const revenue = allOrders.reduce((a,o)=>a+Number(o.total),0);
-  document.getElementById("stat-revenue").textContent  = revenue>=1e6 ? (revenue/1e6).toFixed(1)+"jt" : rupiah(revenue);
-  const low = products.filter(p=>Number(p.stock)<=5).length;
-  document.getElementById("stat-low").textContent = low;
-}
+        function closeBookingModal() {
+            document.getElementById('bookingModal').classList.add('hidden');
+            selectedVehicle = null;
+        }
 
-function switchTab(name){
-  document.querySelectorAll(".admin-tab").forEach((t,i)=>{
-    const tabs=["dashboard","products","orders"];
-    t.classList.toggle("active",tabs[i]===name);
-  });
-  document.querySelectorAll(".admin-panel").forEach(p=>p.classList.remove("active"));
-  document.getElementById("panel-"+name).classList.add("active");
-  if(name==="orders") loadOrders();
-  if(name==="products") loadProductsAdmin();
-}
+        function updateDays(val) {
+            const input = document.getElementById('rentalDays');
+            let current = parseInt(input.value) || 1;
+            current += val;
+            if (current < 1) current = 1;
+            input.value = current;
+            calculateTotal();
+        }
 
-// ---------- PRODUCT MODAL ----------
-function openProductModal(p=null){
-  editingId = p ? p.id : null;
-  document.getElementById("modal-title").textContent = p ? "Edit Produk" : "Tambah Produk";
-  document.getElementById("modal-id").value    = p?.id || "";
-  document.getElementById("modal-name").value  = p?.name || "";
-  document.getElementById("modal-cat").value   = p?.category || "";
-  document.getElementById("modal-price").value = p?.price || "";
-  document.getElementById("modal-stock").value = p?.stock || "";
-  document.getElementById("modal-img").value   = p?.image || "";
-  document.getElementById("product-modal").classList.add("open");
-}
-function closeProductModal(){ document.getElementById("product-modal").classList.remove("open"); }
+        function calculateTotal() {
+            if (!selectedVehicle) return;
+            const days = parseInt(document.getElementById('rentalDays').value) || 1;
+            const total = parseInt(selectedVehicle.harga) * days;
+            document.getElementById('totalBookingPrice').textContent = "Rp " + total.toLocaleString();
+        }
 
-async function saveProduct(){
-  const name  = document.getElementById("modal-name").value.trim();
-  const cat   = document.getElementById("modal-cat").value.trim();
-  const price = document.getElementById("modal-price").value;
-  const stock = document.getElementById("modal-stock").value;
-  const image = document.getElementById("modal-img").value.trim();
+        async function confirmOrder() {
+            const days = parseInt(document.getElementById('rentalDays').value) || 1;
+            const total = parseInt(selectedVehicle.harga) * days;
+            
+            const result = await fetchAPI('addRental', 'POST', {
+                nama: currentUser.name,
+                kota: currentUser.city,
+                kendaraan: selectedVehicle.merk + " " + selectedVehicle.tipe,
+                total: total,
+                durasi: days
+            });
 
-  if(!name||!cat||!price||!stock){ toast("Semua field wajib diisi!", "err"); return; }
+            if (result) {
+                alert(`Pemesanan Berhasil!\nUnit: ${selectedVehicle.merk} ${selectedVehicle.tipe}\nTotal: Rp ${total.toLocaleString()}`);
+                closeBookingModal();
+                await loadInitialData();
+            }
+        }
 
-  const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  if(isConfig){
-    // Demo
-    if(editingId){
-      const idx = products.findIndex(p=>p.id===editingId);
-      if(idx>=0) products[idx] = {...products[idx],name,category:cat,price:Number(price),stock:Number(stock),image};
-      toast("Produk diperbarui (mode demo)!");
-    } else {
-      products.push({id:"P"+Date.now(),name,category:cat,price:Number(price),stock:Number(stock),image});
-      toast("Produk ditambahkan (mode demo)!");
-    }
-    closeProductModal();
-    renderProductsTable();
-    updateDashboard();
-    return;
-  }
+        // --- MODAL ADMIN CRUD ---
+        function openAddModal() { editingId = null; document.getElementById('modalTitle').textContent = "Tambah Unit"; clearModal(); document.getElementById('vehicleModal').classList.remove('hidden'); }
+        function openEditModal(id) { 
+            editingId = id; 
+            const v = dbVehicles.find(x => x.id == id);
+            document.getElementById('modalTitle').textContent = "Edit Unit";
+            document.getElementById('vImg').value = v.img;
+            document.getElementById('vMerk').value = v.merk;
+            document.getElementById('vTipe').value = v.tipe;
+            document.getElementById('vTahun').value = v.tahun;
+            document.getElementById('vHarga').value = v.harga;
+            document.getElementById('vehicleModal').classList.remove('hidden');
+        }
+        function closeVehicleModal() { document.getElementById('vehicleModal').classList.add('hidden'); }
+        
+        function clearModal() {
+            document.getElementById('vImg').value = '';
+            document.getElementById('vMerk').value = '';
+            document.getElementById('vTipe').value = '';
+            document.getElementById('vTahun').value = '';
+            document.getElementById('vHarga').value = '';
+        }
 
-  const action = editingId ? "editProduct" : "addProduct";
-  const res = await api({ action, id:editingId, name, category:cat, price, stock, image });
-  if(res.ok){ toast(res.message || "Berhasil!"); closeProductModal(); await loadProductsAdmin(); updateDashboard(); }
-  else toast(res.message || "Gagal!", "err");
-}
+        async function saveVehicle() {
+            const body = {
+                id: editingId || "ID" + Date.now(),
+                img: document.getElementById('vImg').value || 'https://via.placeholder.com/400x300?text=No+Image',
+                merk: document.getElementById('vMerk').value,
+                tipe: document.getElementById('vTipe').value,
+                tahun: document.getElementById('vTahun').value,
+                harga: parseInt(document.getElementById('vHarga').value) || 0,
+                status: 'Ready'
+            };
+            
+            const result = await fetchAPI('saveProduct', 'POST', body);
+            if (result) {
+                closeVehicleModal();
+                await loadInitialData();
+                showAdminView('inventory');
+            }
+        }
 
-// ---------- DELETE MODAL ----------
-function openDeleteModal(id, name){
-  deleteTarget = id;
-  document.getElementById("delete-name").textContent = name;
-  document.getElementById("delete-modal").classList.add("open");
-}
-function closeDeleteModal(){ document.getElementById("delete-modal").classList.remove("open"); deleteTarget=null; }
+        async function deleteVehicle(id) {
+            if(confirm("Hapus unit ini dari katalog?")) {
+                const result = await fetchAPI('deleteProduct', 'POST', { id: id });
+                if (result) {
+                    await loadInitialData();
+                    renderAdminInventory();
+                    updateAdminStats();
+                }
+            }
+        }
 
-async function confirmDelete(){
-  if(!deleteTarget) return;
-  const isConfig = APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL");
-  if(isConfig){
-    products = products.filter(p=>p.id!==deleteTarget);
-    toast("Produk dihapus (mode demo)!");
-    closeDeleteModal();
-    renderProductsTable();
-    updateDashboard();
-    return;
-  }
-  const res = await api({ action:"deleteProduct", id:deleteTarget });
-  if(res.ok){ toast(res.message || "Dihapus!"); closeDeleteModal(); await loadProductsAdmin(); updateDashboard(); }
-  else toast(res.message || "Gagal!", "err");
-}
-
-function showSetupGuide(){ document.getElementById("setup-modal").classList.add("open"); }
-
-// ---------- INIT ----------
-// Close modals on overlay click
-document.querySelectorAll(".modal-overlay").forEach(o=>o.addEventListener("click",function(e){ if(e.target===this) this.classList.remove("open"); }));
-
-// Admin card - semua event via addEventListener, bukan onclick di HTML
-// Memastikan event listener terpasang dengan benar setelah DOM siap
-document.addEventListener("DOMContentLoaded", function() {
-  const header = document.getElementById("admin-card-header");
-  const loginBtn = document.getElementById("admin-login-btn");
-
-  // Fungsi untuk buka/tutup form login admin
-  if (header) {
-    header.addEventListener("click", function(e) {
-      const f = document.getElementById("admin-form");
-      const hint = document.getElementById("toggle-hint");
-      f.classList.toggle("show");
-      if (f.classList.contains("show")) {
-        hint.textContent = "▲ Tutup";
-      } else {
-        hint.textContent = "▼ Klik untuk login";
-      }
-    });
-  }
-
-  // Tombol Login Admin
-  if (loginBtn) {
-    loginBtn.addEventListener("click", function(e) {
-      e.stopPropagation(); // Agar tidak mentrigger toggle form
-      doAdminLogin();
-    });
-  }
-});
-</script>
+        function logout() { location.reload(); }
+    </script>
 </body>
 </html>
