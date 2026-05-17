@@ -6,6 +6,7 @@
     <title>RentDrive - Solusi Sewa Kendaraan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
         
@@ -66,11 +67,30 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: #1e293b;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            transform: translateY(150%);
+            transition: transform 0.3s ease-out;
+            z-index: 9999;
+            border-left: 4px solid #3b82f6;
+        }
+        .toast.show { transform: translateY(0); }
+
+        /* CSS untuk menyembunyikan scrollbar di banner promo agar rapi */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Loading Overlay -->
     <div id="loader" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 hidden">
         <div class="text-center">
             <div class="loading-spinner mb-4 mx-auto"></div>
@@ -78,8 +98,11 @@
         </div>
     </div>
 
-    <!-- Auth Section -->
-    <div id="authSection" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950">
+    <div id="toast" class="toast">Notifikasi</div>
+
+    <!-- Login Section -->
+    <div id="authSection" class="fixed inset-0 z-50 flex items-center justify-center p-4" 
+         style="background-image: url('https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; background-color: rgba(2, 6, 23, 0.7); background-blend-mode: overlay;">
         <div class="w-full max-w-md p-8 glass-card rounded-3xl shadow-2xl">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-4">
@@ -100,7 +123,7 @@
 
                 <div id="adminFields" class="hidden">
                     <label class="block text-sm font-medium mb-1">Kode Akses Dev</label>
-                    <input type="password" id="adminPass" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Kode Admin">
+                    <input type="password" id="adminPass" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Kode Admin (12345)">
                 </div>
 
                 <button id="loginBtn" onclick="handleLogin()" class="w-full btn-primary py-4 rounded-xl font-bold text-lg">
@@ -115,43 +138,61 @@
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- App Content -->
     <div id="mainApp" class="hidden pb-20">
-        <!-- Navigation -->
+        <div class="bg-gradient-to-r from-blue-700 to-blue-500 text-white text-xs font-semibold py-2 px-6 overflow-x-auto hide-scrollbar flex gap-8 whitespace-nowrap snap-x snap-mandatory">
+            <div class="snap-center shrink-0"><i class="fas fa-tag mr-2 text-amber-300"></i>Diskon 20% Pengguna Baru (Kode: NEW20)</div>
+            <div class="snap-center shrink-0"><i class="fas fa-car mr-2 text-amber-300"></i>Gratis Antar Jemput (Min. Sewa 3 Hari)</div>
+            <div class="snap-center shrink-0"><i class="fas fa-fire mr-2 text-amber-300"></i>Promo Weekend: Potongan Rp 50.000</div>
+            <div class="snap-center shrink-0"><i class="fas fa-tag mr-2 text-amber-300"></i>Diskon 20% Pengguna Baru (Kode: NEW20)</div>
+            <div class="snap-center shrink-0"><i class="fas fa-car mr-2 text-amber-300"></i>Gratis Antar Jemput (Min. Sewa 3 Hari)</div>
+            <div class="snap-center shrink-0"><i class="fas fa-fire mr-2 text-amber-300"></i>Promo Weekend: Potongan Rp 50.000</div>
+            <div class="snap-center shrink-0"><i class="fas fa-tag mr-2 text-amber-300"></i>Diskon 20% Pengguna Baru (Kode: NEW20)</div>
+            <div class="snap-center shrink-0"><i class="fas fa-car mr-2 text-amber-300"></i>Gratis Antar Jemput (Min. Sewa 3 Hari)</div>
+            <div class="snap-center shrink-0"><i class="fas fa-fire mr-2 text-amber-300"></i>Promo Weekend: Potongan Rp 50.000</div>
+        </div>
         <nav class="sticky top-0 z-40 glass-card px-6 py-4 flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <i class="fas fa-car-side text-blue-500 text-2xl"></i>
                 <span class="font-bold text-xl tracking-tight">RentDrive</span>
             </div>
             <div class="flex items-center gap-4">
+                <button id="btnMyOrders" onclick="showUserView('orders')" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors">
+                    <i class="fas fa-clipboard-list mr-2"></i>Pesanan Saya
+                </button>
+                <button id="btnCatalog" onclick="showUserView('catalog')" class="hidden px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm font-semibold transition-colors">
+                    <i class="fas fa-car mr-2"></i>Katalog
+                </button>
+
                 <div class="text-right hidden sm:block">
                     <p id="navUserName" class="font-semibold text-sm leading-none"></p>
                     <span id="navUserRole" class="text-[10px] uppercase tracking-widest text-blue-400">Penyewa</span>
                 </div>
-                <button onclick="logout()" class="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors">
+                <button onclick="logout()" class="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors" title="Keluar">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
         </nav>
 
-        <!-- Admin Only Dashboard Section -->
-        <section id="adminDashboard" class="hidden px-6 mt-8">
-            <div class="flex justify-between items-center mb-6">
+        <!-- Admin Section -->
+        <section id="adminDashboard" class="hidden px-6 mt-8 max-w-7xl mx-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h2 class="text-2xl font-bold">Dashboard Admin</h2>
-                <div class="flex gap-2">
-                    <button onclick="showAdminView('inventory')" class="px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Produk</button>
-                    <button onclick="showAdminView('history')" class="px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Riwayat Sewa</button>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="showAdminView('inventory')" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Produk</button>
+                    <button onclick="showAdminView('history')" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Data Pembelian</button>
+                    <button onclick="showAdminView('users')" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-slate-800 text-sm hover:bg-slate-700">Penyewa</button>
                 </div>
             </div>
 
-            <!-- Stats -->
+            <!-- Dashboard Stats -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div class="glass-card p-6 rounded-3xl border-l-4 border-blue-500">
                     <p class="text-slate-400 text-xs uppercase mb-1">Total Unit Kendaraan</p>
                     <h4 id="statTotalMobil" class="text-3xl font-bold">0</h4>
                 </div>
                 <div class="glass-card p-6 rounded-3xl border-l-4 border-green-500">
-                    <p class="text-slate-400 text-xs uppercase mb-1">Pesanan Masuk</p>
+                    <p class="text-slate-400 text-xs uppercase mb-1">Total Transaksi</p>
                     <h4 id="statTotalOrder" class="text-3xl font-bold">0</h4>
                 </div>
                 <div class="glass-card p-6 rounded-3xl border-l-4 border-amber-500">
@@ -160,64 +201,101 @@
                 </div>
             </div>
 
-            <!-- View: History Sewa -->
+            <!-- View: History Pembelian -->
             <div id="viewHistory" class="hidden glass-card rounded-3xl p-6 overflow-x-auto">
-                <h3 class="font-bold mb-4">Daftar Riwayat Penyewa</h3>
-                <table class="admin-table">
+                <h3 class="font-bold mb-4">Kelola Riwayat Pembelian & Sewa</h3>
+                <table class="admin-table w-full min-w-[900px]">
                     <thead>
                         <tr>
+                            <th>ID Order</th>
                             <th>Penyewa</th>
-                            <th>Kota</th>
                             <th>Kendaraan</th>
-                            <th>Durasi</th>
-                            <th>Tanggal</th>
-                            <th>Total Biaya</th>
+                            <th>Mulai</th>
+                            <th>Selesai</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
-                    <tbody id="historyTableBody">
-                        <!-- Data row -->
-                    </tbody>
+                    <tbody id="historyTableBody"></tbody>
                 </table>
             </div>
 
-            <!-- View: Inventory (CRUD) -->
+            <!-- View: Data Penyewa -->
+            <div id="viewUsers" class="hidden glass-card rounded-3xl p-6 overflow-x-auto">
+                <h3 class="font-bold mb-4">Daftar Penyewa Terdaftar</h3>
+                <table class="admin-table w-full">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Nama Lengkap</th>
+                            <th>Asal Kota</th>
+                            <th>Login Terakhir</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- View: Inventory -->
             <div id="viewInventory" class="mb-8">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold">Katalog Kendaraan</h3>
+                    <h3 class="font-bold">Katalog Produk</h3>
                     <button onclick="openAddModal()" class="btn-primary px-4 py-2 rounded-xl text-xs font-bold">+ Unit Baru</button>
                 </div>
-                <div id="adminVehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Cards with Edit/Delete -->
-                </div>
+                <div id="adminVehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </div>
         </section>
 
-        <!-- User View: Catalog -->
-        <section id="userCatalog" class="px-6 py-8">
-            <h2 class="text-2xl font-bold mb-6">Pilih Kendaraan Anda</h2>
-            <div id="vehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- User Cards -->
+        <!-- User Section -->
+        <section id="userDashboard" class="hidden px-6 py-8 max-w-7xl mx-auto">
+            <div id="userCatalogView">
+                <h2 class="text-2xl font-bold mb-6">Pilih Kendaraan Anda</h2>
+                <div id="vehicleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            </div>
+            <div id="userOrdersView" class="hidden">
+                <h2 class="text-2xl font-bold mb-6">Pesanan & Status Sewa Saya</h2>
+                <div id="myOrdersGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </section>
     </div>
 
-    <!-- Modal Konfirmasi Sewa (Penyewa) -->
+    <!-- Modals -->
     <div id="bookingModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
-        <div class="glass-card w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
-            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-xl font-bold">Konfirmasi Sewa</h3>
+        <div class="glass-card w-full max-w-md rounded-3xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center shrink-0">
+                <h3 class="text-xl font-bold">Detail Pembelian</h3>
                 <button onclick="closeBookingModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
-            <div class="p-6 space-y-6">
-                <div id="bookingDetail" class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
-                    <!-- Dinamis Info Mobil -->
+            <div class="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                <div id="bookingDetail" class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800"></div>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">Email</label>
+                        <input type="email" id="bookEmail" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="email@anda.com">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">No. Telepon / WA</label>
+                        <input type="tel" id="bookPhone" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400 mb-1 block">Metode Pembayaran</label>
+                        <select id="bookPayment" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 appearance-none">
+                            <option value="" disabled selected>-- Pilih Pembayaran --</option>
+                            <option value="QRIS">QRIS (GoPay, OVO, ShopeePay)</option>
+                            <option value="Transfer Bank">Transfer Bank (BCA, Mandiri, BNI)</option>
+                            <option value="DANA">DANA</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div>
-                    <label class="block text-sm font-medium mb-2">Berapa hari Anda akan menyewa?</label>
+                    <label class="block text-sm font-medium mb-2">Durasi Sewa (Hari)</label>
                     <div class="flex items-center gap-4">
-                        <button onclick="updateDays(-1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700">-</button>
+                        <button onclick="updateDays(-1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 shrink-0">-</button>
                         <input type="number" id="rentalDays" value="1" min="1" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-center text-lg font-bold outline-none" oninput="calculateTotal()">
-                        <button onclick="updateDays(1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700">+</button>
+                        <button onclick="updateDays(1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700 shrink-0">+</button>
                     </div>
                 </div>
                 <div class="flex justify-between items-center pt-4 border-t border-slate-800">
@@ -225,18 +303,17 @@
                     <span id="totalBookingPrice" class="text-2xl font-bold text-blue-500">Rp 0</span>
                 </div>
             </div>
-            <div class="p-6 bg-slate-900/50 flex flex-col gap-3">
-                <button id="btnConfirmOrder" onclick="confirmOrder()" class="w-full btn-primary py-3 rounded-xl font-bold">Konfirmasi & Kirim Pesanan</button>
+            <div class="p-6 bg-slate-900/50 flex flex-col gap-3 shrink-0">
+                <button id="btnConfirmOrder" onclick="confirmOrder()" class="w-full btn-primary py-3 rounded-xl font-bold">Bayar & Sewa Sekarang</button>
                 <button onclick="closeBookingModal()" class="w-full py-2 text-sm text-slate-400 hover:text-white">Batal</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal CRUD (Admin) -->
     <div id="vehicleModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
         <div class="glass-card w-full max-w-lg rounded-3xl overflow-hidden shadow-2xl">
             <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
-                <h3 id="modalTitle" class="text-xl font-bold">Detail Unit</h3>
+                <h3 id="modalTitle" class="text-xl font-bold">Detail Produk</h3>
                 <button onclick="closeVehicleModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
             </div>
             <div class="p-6">
@@ -251,83 +328,98 @@
                 </div>
             </div>
             <div class="p-6 border-t border-slate-800 flex justify-end gap-3">
-                <button id="btnSaveVehicle" onclick="saveVehicle()" class="btn-primary px-8 py-2 rounded-xl text-sm font-bold">Simpan</button>
+                <button onclick="saveVehicle()" class="btn-primary px-8 py-2 rounded-xl text-sm font-bold">Simpan Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Order Modal -->
+    <div id="editOrderModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="glass-card w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
+            <div class="px-6 py-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-xl font-bold">Edit Durasi Pesanan</h3>
+                <button onclick="closeEditOrderModal()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-slate-900/50 p-4 rounded-2xl border border-slate-800">
+                    <p class="text-xs text-slate-400 mb-1">Penyewa: <span id="editOrderUser" class="text-white font-bold"></span></p>
+                    <p class="text-sm font-bold text-blue-400" id="editOrderVehicle"></p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Ubah Durasi (Hari)</label>
+                    <div class="flex items-center gap-4">
+                        <button onclick="changeEditOrderDays(-1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700">-</button>
+                        <input type="number" id="editOrderDays" min="1" class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-center text-lg font-bold outline-none" oninput="calcEditOrderTotal()">
+                        <button onclick="changeEditOrderDays(1)" class="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:bg-slate-700">+</button>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+                    <span class="text-slate-400">Total Harga Baru:</span>
+                    <span id="editOrderTotalDisplay" class="text-2xl font-bold text-green-400">Rp 0</span>
+                </div>
+            </div>
+            <div class="p-6 flex gap-3">
+                <button onclick="closeEditOrderModal()" class="w-1/2 py-3 rounded-xl bg-slate-800 text-white font-bold hover:bg-slate-700">Batal</button>
+                <button onclick="saveEditOrder()" class="w-1/2 btn-primary py-3 rounded-xl font-bold">Simpan</button>
             </div>
         </div>
     </div>
 
     <script>
-        // API CONFIGURATION
-        const API_URL = "https://script.google.com/macros/s/AKfycbzn-vsPlSIZDVKjE1ry1jUU1NRxdYCOVUsYheh2J_Awsf0yOznf1eQ0_cXD_zq0tjMZuA/exec";
+        // MASUKKAN URL API GOOGLE SCRIPT ANDA DI SINI
+        const API_URL = "https://script.google.com/macros/s/AKfycbzFmTaSG00qRphtpsgvp1aHtE9wDGUnkcIX8nTsAPOKGxOJAsiRAQLN16c5oUF3mkqm/exec"; 
 
-        let dbVehicles = [];
-        let dbHistory = [];
-        let currentUser = null;
-        let loginMode = 'user';
-        let editingId = null;
-        let selectedVehicle = null;
+        let state = {
+            vehicles: [], rentals: [], users: [], myOrders: [],
+            currentUser: null, loginMode: 'user', editingId: null, selectedVehicle: null
+        };
 
-        // --- FETCH UTILS ---
-        async function fetchAPI(action, method = 'GET', body = null) {
+        async function fetchAPI(action, payload = null) {
             showLoader(true);
             try {
-                let url = `${API_URL}?action=${action}`;
-                const options = {
-                    method: method,
-                    mode: 'no-cors' // Penting untuk Apps Script Web App
+                let options = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: action, data: payload })
                 };
-
-                if (method === 'POST') {
-                    options.body = JSON.stringify({ action, ...body });
-                }
-
-                // Karena no-cors, kita tidak bisa baca respons langsung untuk POST.
-                // Untuk GET, kita butuh data, jadi kita tetap pakai default cors jika memungkinkan atau proxy.
-                // Untuk demo ini, kita asumsikan GET bisa jalan (Apps Script mendukung JSONP/CORS GET).
+                const response = await fetch(API_URL, options);
+                const result = await response.json();
                 
-                if (method === 'GET') {
-                    const response = await fetch(url);
-                    const json = await response.json();
-                    return json;
-                } else {
-                    // Untuk POST (no-cors), kita asumsikan berhasil karena Apps Script memprosesnya
-                    await fetch(API_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify({ action, ...body })
-                    });
-                    return { status: 'success' };
+                // Cek jika status dari backend error
+                if(result.status === 'error') {
+                    // Cek jika errornya adalah 'Action not found'
+                    if (result.message && result.message.includes("Action not found")) {
+                        console.warn(`Aksi '${action}' tidak ditemukan di backend.`);
+                        showToast(`Fitur '${action}' belum diaktifkan di Apps Script`, "error");
+                        return null;
+                    }
+                    throw new Error(result.message);
                 }
+                
+                // Return data jika ada, jika tidak kembalikan true sebagai tanda sukses
+                return result.data !== undefined ? result.data : true;
             } catch (error) {
                 console.error("API Error:", error);
+                showToast("Terjadi kesalahan sistem.", "error");
                 return null;
             } finally {
                 showLoader(false);
             }
         }
 
-        function showLoader(show) {
-            document.getElementById('loader').classList.toggle('hidden', !show);
+        function showLoader(show) { document.getElementById('loader').classList.toggle('hidden', !show); }
+        function showToast(msg, type='success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.borderLeftColor = type === 'error' ? '#ef4444' : '#3b82f6';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // --- DATA LOADING ---
-        async function loadInitialData() {
-            const products = await fetchAPI('getProducts');
-            if (products) dbVehicles = products;
-
-            const rentals = await fetchAPI('getRentals');
-            if (rentals) dbHistory = rentals;
-
-            if (currentUser && currentUser.role === 'Developer') {
-                showAdminView('inventory');
-            } else if (currentUser) {
-                renderUserCatalog();
-            }
-        }
-
-        // --- CORE FUNCTIONS ---
         function toggleLoginMode(mode) {
-            loginMode = mode;
+            state.loginMode = mode;
             document.getElementById('userFields').classList.toggle('hidden', mode === 'admin');
             document.getElementById('adminFields').classList.toggle('hidden', mode === 'user');
             document.getElementById('btnToAdmin').classList.toggle('hidden', mode === 'admin');
@@ -335,64 +427,90 @@
         }
 
         async function handleLogin() {
-            if (loginMode === 'user') {
-                const n = document.getElementById('loginName').value;
-                const c = document.getElementById('loginCity').value;
-                if (!n || !c) return alert("Isi Nama & Kota Anda");
-                currentUser = { name: n, city: c, role: 'Penyewa' };
+            if (state.loginMode === 'user') {
+                const n = document.getElementById('loginName').value.trim();
+                const c = document.getElementById('loginCity').value.trim();
+                if (!n || !c) return showToast("Isi Nama & Kota Anda", "error");
+                
+                const userRes = await fetchAPI('loginUser', { nama: n, kota: c });
+                if(!userRes) return;
+                state.currentUser = { ...userRes, role: 'Penyewa' };
             } else {
-                if (document.getElementById('adminPass').value !== '12345') return alert("Kode Akses Salah!");
-                currentUser = { name: 'Admin Dev', city: 'Pusat', role: 'Developer' };
+                if (document.getElementById('adminPass').value !== '12345') return showToast("Kode Akses Salah!", "error");
+                state.currentUser = { user_id: 'ADMIN', nama: 'Admin Dev', kota: 'Pusat', role: 'Developer' };
             }
             
             await loadInitialData();
             initApp();
         }
 
-        function initApp() {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('navUserName').textContent = currentUser.name;
-            document.getElementById('navUserRole').textContent = currentUser.role;
+        async function loadInitialData() {
+            const products = await fetchAPI('getProducts');
+            if (products) state.vehicles = products;
 
-            if (currentUser.role === 'Developer') {
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                document.getElementById('userCatalog').classList.add('hidden');
-                showAdminView('inventory');
+            if (state.currentUser.role === 'Developer') {
+                const dataAdmin = await fetchAPI('getAdminData');
+                if(dataAdmin) {
+                    state.rentals = dataAdmin.rentals;
+                    state.users = dataAdmin.users;
+                }
             } else {
-                document.getElementById('adminDashboard').classList.add('hidden');
-                document.getElementById('userCatalog').classList.remove('hidden');
-                renderUserCatalog();
+                const userOrders = await fetchAPI('getUserOrders', { user_id: state.currentUser.user_id });
+                if(userOrders) state.myOrders = userOrders;
             }
         }
 
-        // --- VIEW ADMIN LOGIC ---
-        async function showAdminView(view) {
+        function initApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('navUserName').textContent = state.currentUser.nama;
+            document.getElementById('navUserRole').textContent = state.currentUser.role;
+
+            if (state.currentUser.role === 'Developer') {
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                document.getElementById('userDashboard').classList.add('hidden');
+                document.getElementById('btnMyOrders').classList.add('hidden');
+                document.getElementById('btnCatalog').classList.add('hidden');
+                showAdminView('inventory');
+            } else {
+                document.getElementById('adminDashboard').classList.add('hidden');
+                document.getElementById('userDashboard').classList.remove('hidden');
+                document.getElementById('btnMyOrders').classList.remove('hidden');
+                document.getElementById('btnCatalog').classList.remove('hidden');
+                showUserView('catalog');
+            }
+        }
+
+        function showAdminView(view) {
             document.getElementById('viewInventory').classList.toggle('hidden', view !== 'inventory');
             document.getElementById('viewHistory').classList.toggle('hidden', view !== 'history');
+            document.getElementById('viewUsers').classList.toggle('hidden', view !== 'users');
             
             if (view === 'inventory') renderAdminInventory();
-            if (view === 'history') {
-                // Refresh history data
-                const rentals = await fetchAPI('getRentals');
-                if (rentals) dbHistory = rentals;
-                renderAdminHistory();
-            }
+            if (view === 'history') renderAdminHistory();
+            if (view === 'users') renderAdminUsers();
             updateAdminStats();
+        }
+
+        function updateAdminStats() {
+            document.getElementById('statTotalMobil').textContent = state.vehicles.length;
+            document.getElementById('statTotalOrder').textContent = state.rentals.length;
+            const total = state.rentals.reduce((acc, curr) => acc + parseInt(curr.total_harga || 0), 0);
+            document.getElementById('statTotalUang').textContent = "Rp " + total.toLocaleString();
         }
 
         function renderAdminInventory() {
             const grid = document.getElementById('adminVehicleGrid');
-            grid.innerHTML = dbVehicles.map(v => `
-                <div class="glass-card p-4 rounded-2xl flex items-center gap-4">
-                    <img src="${v.img}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+            grid.innerHTML = state.vehicles.map(v => `
+                <div class="glass-card p-4 rounded-2xl flex items-center gap-4 border border-slate-700/50">
+                    <img src="${v.img}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=No+Img'">
                     <div class="flex-1">
                         <h4 class="font-bold text-sm">${v.merk} ${v.tipe}</h4>
                         <p class="text-xs text-slate-400">Rp ${parseInt(v.harga).toLocaleString()}/hari</p>
                     </div>
                     <div class="flex gap-2">
-                        <button onclick="openEditModal(${v.id})" class="text-blue-400 p-2"><i class="fas fa-edit text-xs"></i></button>
-                        <button onclick="deleteVehicle(${v.id})" class="text-red-400 p-2"><i class="fas fa-trash text-xs"></i></button>
+                        <button onclick="openEditModal('${v.id}')" class="text-blue-400 p-2 bg-blue-500/10 rounded-lg hover:bg-blue-500/30"><i class="fas fa-edit text-xs"></i></button>
+                        <button onclick="deleteVehicle('${v.id}')" class="text-red-400 p-2 bg-red-500/10 rounded-lg hover:bg-red-500/30"><i class="fas fa-trash text-xs"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -400,66 +518,227 @@
 
         function renderAdminHistory() {
             const body = document.getElementById('historyTableBody');
-            body.innerHTML = dbHistory.map(h => `
+            body.innerHTML = state.rentals.map(h => {
+                let statusColor = h.status_pesanan === 'Aktif' ? 'text-green-400' : 'text-slate-500';
+                
+                let btnSelesai = h.status_pesanan === 'Aktif' 
+                    ? `<button onclick="changeOrderStatus('${h.order_id}', 'Selesai')" class="px-2 py-1 bg-green-500/20 text-green-400 rounded hover:bg-green-500/40" title="Tandai Selesai"><i class="fas fa-check text-xs"></i></button>`
+                    : '';
+
+                return `
                 <tr>
-                    <td><div class="font-bold">${h.nama}</div></td>
-                    <td><div class="text-slate-400 text-xs">${h.kota}</div></td>
-                    <td><span class="text-blue-400 font-bold">${h.kendaraan}</span></td>
-                    <td>${h.durasi || '-'} hari</td>
-                    <td class="text-xs text-slate-500">${h.tanggal}</td>
-                    <td class="font-bold text-green-400">Rp ${parseInt(h.total_harga || 0).toLocaleString()}</td>
+                    <td class="text-xs text-slate-400">${h.order_id}</td>
+                    <td><div class="font-bold">${h.nama_penyewa}</div></td>
+                    <td><span class="text-blue-400 font-bold">${h.nama_kendaraan}</span></td>
+                    <td class="text-xs">${formatDate(h.tanggal_sewa)}</td>
+                    <td class="text-xs">${formatDate(h.tanggal_selesai)}</td>
+                    <td class="font-semibold ${statusColor}">${h.status_pesanan}</td>
+                    <td class="font-bold">Rp ${parseInt(h.total_harga || 0).toLocaleString()}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            ${btnSelesai}
+                            <button onclick="openEditOrderModal('${h.order_id}')" class="px-2 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/40" title="Edit Durasi Pesanan"><i class="fas fa-edit text-xs"></i></button>
+                            <button onclick="deleteOrderData('${h.order_id}')" class="px-2 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500/40" title="Hapus Permanen"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function renderAdminUsers() {
+            const body = document.getElementById('usersTableBody');
+            body.innerHTML = state.users.map(u => `
+                <tr>
+                    <td class="text-xs text-slate-400">${u.user_id}</td>
+                    <td class="font-bold text-white">${u.nama}</td>
+                    <td class="text-slate-300">${u.kota}</td>
+                    <td class="text-xs text-slate-400">${formatDate(u.last_login)}</td>
                 </tr>
             `).join('');
         }
 
-        function updateAdminStats() {
-            document.getElementById('statTotalMobil').textContent = dbVehicles.length;
-            document.getElementById('statTotalOrder').textContent = dbHistory.length;
-            const total = dbHistory.reduce((acc, curr) => acc + parseInt(curr.total_harga || 0), 0);
-            document.getElementById('statTotalUang').textContent = "Rp " + total.toLocaleString();
+        function showUserView(view) {
+            document.getElementById('userCatalogView').classList.toggle('hidden', view !== 'catalog');
+            document.getElementById('userOrdersView').classList.toggle('hidden', view !== 'orders');
+            
+            if (view === 'catalog') {
+                renderUserCatalog();
+            } else if (view === 'orders') {
+                renderMyOrders();
+            }
         }
 
-        // --- USER & SEWA LOGIC ---
-        function renderUserCatalog() {
+function renderUserCatalog() {
             const grid = document.getElementById('vehicleGrid');
-            grid.innerHTML = dbVehicles.map(v => `
-                <div class="glass-card rounded-3xl overflow-hidden group">
-                    <div class="h-40 overflow-hidden">
-                        <img src="${v.img}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/400x300?text=No+Image'">
+            grid.innerHTML = state.vehicles.map(v => {
+                // Cek jika data kosong, ganti dengan teks kosong agar tidak muncul "undefined"
+                const merk = v.merk || '';
+                const tipe = v.tipe || '';
+                const tahun = v.tahun ? `<span class="text-sm font-normal text-blue-400">(${v.tahun})</span>` : '';
+                
+                return `
+                <div class="glass-card rounded-3xl overflow-hidden group flex flex-col border border-slate-700/50">
+                    <div class="h-48 overflow-hidden relative">
+                        <img src="${v.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/400x300/1e293b/ffffff?text=Car'">
                     </div>
-                    <div class="p-5">
-                        <h4 class="font-bold text-lg">${v.merk} ${v.tipe}</h4>
-                        <p class="text-slate-500 text-xs mb-1 italic">${v.tahun}</p>
-                        <p class="text-blue-400 font-bold text-sm mb-4">Rp ${parseInt(v.harga).toLocaleString()}/hari</p>
-                        <button onclick="openBookingModal(${v.id})" class="w-full py-3 rounded-xl btn-primary text-white transition-all text-xs font-bold">
-                            SEWA SEKARANG
-                        </button>
+                    <div class="p-5 flex-1 flex flex-col">
+                        <h4 class="font-bold text-xl mb-1">${merk} ${tipe} ${tahun}</h4>
+                        <div class="mt-auto pt-4">
+                            <p class="text-white font-bold text-lg mb-4">Rp ${parseInt(v.harga || 0).toLocaleString()}<span class="text-sm font-normal text-slate-400"> / hari</span></p>
+                            <button onclick="openBookingModal('${v.id}')" class="w-full py-3 rounded-xl btn-primary text-white transition-all font-bold">
+                                SEWA SEKARANG
+                            </button>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+                `
+            }).join('');
+        }
+
+        function renderMyOrders() {
+            const grid = document.getElementById('myOrdersGrid');
+            if(state.myOrders.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400 glass-card rounded-3xl">Belum ada riwayat pesanan.</div>`;
+                return;
+            }
+            grid.innerHTML = state.myOrders.map(o => {
+                let badgeClass = o.status_pesanan === 'Selesai' ? 'bg-slate-800 text-slate-400' : 'bg-green-500/20 text-green-400';
+                // Hindari undefined jika data lama belum punya metode pembayaran
+                let metodeTag = o.metode_pembayaran ? o.metode_pembayaran : 'Tunai/Belum diatur';
+
+                return `
+                <div class="glass-card p-5 rounded-3xl border border-slate-700/50 flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-xs text-slate-400 mb-1">ID: ${o.order_id}</p>
+                            <h4 class="font-bold text-lg text-white">${o.nama_kendaraan || 'Kendaraan'}</h4>
+                        </div>
+                        <span class="${badgeClass} px-3 py-1 rounded-full text-xs font-bold">${o.status_pesanan || 'Diproses'}</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm"><span class="text-slate-400">Durasi</span><span class="font-medium">${o.durasi} Hari</span></div>
+                        <div class="flex justify-between text-sm"><span class="text-slate-400">Pembayaran</span><span class="font-medium text-amber-400">${metodeTag}</span></div>
+                        <div class="flex justify-between text-sm border-t border-slate-700/50 pt-2"><span class="text-slate-400">Total Biaya</span><span class="font-bold text-blue-400">Rp ${parseInt(o.total_harga || 0).toLocaleString()}</span></div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function changeOrderStatus(orderId, newStatus) {
+            if(confirm(`Ubah status pesanan menjadi ${newStatus}?`)) {
+                const res = await fetchAPI('updateOrderStatus', { order_id: orderId, status: newStatus });
+                if(res) {
+                    showToast("Status berhasil diperbarui!");
+                    const dataAdmin = await fetchAPI('getAdminData');
+                    if(dataAdmin) state.rentals = dataAdmin.rentals;
+                    renderAdminHistory();
+                }
+            }
+        }
+
+        async function deleteOrderData(orderId) {
+            if(confirm("Yakin ingin menghapus data pesanan ini selamanya dari riwayat?")) {
+                const res = await fetchAPI('deleteOrder', { order_id: orderId });
+                if(res) {
+                    showToast("Data pesanan berhasil dihapus!");
+                    const dataAdmin = await fetchAPI('getAdminData');
+                    if(dataAdmin) state.rentals = dataAdmin.rentals;
+                    renderAdminHistory();
+                    updateAdminStats();
+                }
+            }
+        }
+
+        let currentEditOrder = null;
+        let currentEditRate = 0;
+
+        function openEditOrderModal(orderId) {
+            currentEditOrder = state.rentals.find(o => o.order_id == orderId);
+            
+            if(!currentEditOrder) {
+                showToast("Data pesanan tidak ditemukan", "error");
+                return;
+            }
+            
+            currentEditRate = parseInt(currentEditOrder.total_harga) / parseInt(currentEditOrder.durasi);
+            
+            document.getElementById('editOrderUser').textContent = currentEditOrder.nama_penyewa;
+            document.getElementById('editOrderVehicle').textContent = currentEditOrder.nama_kendaraan;
+            document.getElementById('editOrderDays').value = currentEditOrder.durasi;
+            
+            calcEditOrderTotal();
+            document.getElementById('editOrderModal').classList.remove('hidden');
+        }
+
+        function closeEditOrderModal() {
+            document.getElementById('editOrderModal').classList.add('hidden');
+            currentEditOrder = null;
+        }
+
+        function changeEditOrderDays(val) {
+            const input = document.getElementById('editOrderDays');
+            let current = parseInt(input.value) || 1;
+            current += val;
+            if (current < 1) current = 1;
+            input.value = current;
+            calcEditOrderTotal();
+        }
+
+        function calcEditOrderTotal() {
+            const days = parseInt(document.getElementById('editOrderDays').value) || 1;
+            const newTotal = currentEditRate * days;
+            document.getElementById('editOrderTotalDisplay').textContent = "Rp " + newTotal.toLocaleString();
+        }
+
+        async function saveEditOrder() {
+            if(!currentEditOrder) return;
+            const newDays = parseInt(document.getElementById('editOrderDays').value) || 1;
+            const newTotal = currentEditRate * newDays;
+            
+            const payload = {
+                order_id: currentEditOrder.order_id,
+                durasi: newDays,
+                total_harga: newTotal
+            };
+
+            // PERBAIKAN: Jika aksi updateOrderDetails tidak ada, Anda mungkin perlu mengimplementasikannya di Apps Script.
+            // Sebagai solusi sementara, saya menambahkan validasi error.
+            const res = await fetchAPI('updateOrderDetails', payload);
+            if(res) {
+                showToast("Durasi pesanan berhasil diperbarui!");
+                closeEditOrderModal();
+                const dataAdmin = await fetchAPI('getAdminData');
+                if(dataAdmin) state.rentals = dataAdmin.rentals;
+                renderAdminHistory();
+                updateAdminStats();
+            }
         }
 
         function openBookingModal(id) {
-            selectedVehicle = dbVehicles.find(v => v.id == id);
-            const detail = document.getElementById('bookingDetail');
-            detail.innerHTML = `
+            state.selectedVehicle = state.vehicles.find(v => v.id == id);
+            
+            if(!state.selectedVehicle) return;
+
+            document.getElementById('bookingDetail').innerHTML = `
                 <div class="flex items-center gap-4">
-                    <img src="${selectedVehicle.img}" class="w-16 h-16 rounded-xl object-cover" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
+                    <img src="${state.selectedVehicle.img}" class="w-20 h-20 rounded-xl object-cover">
                     <div>
-                        <h4 class="font-bold">${selectedVehicle.merk} ${selectedVehicle.tipe}</h4>
-                        <p class="text-xs text-slate-400">Tarif Harian: Rp ${parseInt(selectedVehicle.harga).toLocaleString()}</p>
+                        <h4 class="font-bold text-lg">${state.selectedVehicle.merk} ${state.selectedVehicle.tipe}</h4>
+                        <p class="text-sm text-blue-400">Rp ${parseInt(state.selectedVehicle.harga).toLocaleString()} / hari</p>
                     </div>
-                </div>
-            `;
+                </div>`;
+            
+            // Reset form saat dibuka
+            document.getElementById('bookEmail').value = '';
+            document.getElementById('bookPhone').value = '';
+            document.getElementById('bookPayment').value = '';
             document.getElementById('rentalDays').value = 1;
+            
             calculateTotal();
             document.getElementById('bookingModal').classList.remove('hidden');
         }
 
-        function closeBookingModal() {
-            document.getElementById('bookingModal').classList.add('hidden');
-            selectedVehicle = null;
-        }
+        function closeBookingModal() { document.getElementById('bookingModal').classList.add('hidden'); state.selectedVehicle = null; }
 
         function updateDays(val) {
             const input = document.getElementById('rentalDays');
@@ -471,82 +750,109 @@
         }
 
         function calculateTotal() {
-            if (!selectedVehicle) return;
+            if (!state.selectedVehicle) return;
             const days = parseInt(document.getElementById('rentalDays').value) || 1;
-            const total = parseInt(selectedVehicle.harga) * days;
+            const total = parseInt(state.selectedVehicle.harga) * days;
             document.getElementById('totalBookingPrice').textContent = "Rp " + total.toLocaleString();
         }
 
         async function confirmOrder() {
             const days = parseInt(document.getElementById('rentalDays').value) || 1;
-            const total = parseInt(selectedVehicle.harga) * days;
-            
-            const result = await fetchAPI('addRental', 'POST', {
-                nama: currentUser.name,
-                kota: currentUser.city,
-                kendaraan: selectedVehicle.merk + " " + selectedVehicle.tipe,
-                total: total,
-                durasi: days
-            });
+            const email = document.getElementById('bookEmail').value.trim();
+            const phone = document.getElementById('bookPhone').value.trim();
+            const payment = document.getElementById('bookPayment').value;
 
+            if(!email || !phone || !payment) {
+                return showToast("Mohon lengkapi Email, Telepon, dan Metode Pembayaran!", "error");
+            }
+
+            const payload = {
+                user_id: state.currentUser.user_id,
+                nama_penyewa: state.currentUser.nama,
+                kendaraan_id: state.selectedVehicle.id,
+                nama_kendaraan: `${state.selectedVehicle.merk} ${state.selectedVehicle.tipe}`,
+                durasi: days,
+                total_harga: parseInt(state.selectedVehicle.harga) * days,
+                email: email,
+                telepon: phone,
+                metode_pembayaran: payment
+            };
+
+            const result = await fetchAPI('addRental', payload);
             if (result) {
-                alert(`Pemesanan Berhasil!\nUnit: ${selectedVehicle.merk} ${selectedVehicle.tipe}\nTotal: Rp ${total.toLocaleString()}`);
+                showToast("Pesanan Berhasil Dibuat!");
                 closeBookingModal();
-                await loadInitialData();
+                const userOrders = await fetchAPI('getUserOrders', { user_id: state.currentUser.user_id });
+                if(userOrders) state.myOrders = userOrders;
+                showUserView('orders');
             }
         }
 
-        // --- MODAL ADMIN CRUD ---
-        function openAddModal() { editingId = null; document.getElementById('modalTitle').textContent = "Tambah Unit"; clearModal(); document.getElementById('vehicleModal').classList.remove('hidden'); }
-        function openEditModal(id) { 
-            editingId = id; 
-            const v = dbVehicles.find(x => x.id == id);
-            document.getElementById('modalTitle').textContent = "Edit Unit";
-            document.getElementById('vImg').value = v.img;
-            document.getElementById('vMerk').value = v.merk;
-            document.getElementById('vTipe').value = v.tipe;
-            document.getElementById('vTahun').value = v.tahun;
-            document.getElementById('vHarga').value = v.harga;
-            document.getElementById('vehicleModal').classList.remove('hidden');
-        }
-        function closeVehicleModal() { document.getElementById('vehicleModal').classList.add('hidden'); }
-        
-        function clearModal() {
-            document.getElementById('vImg').value = '';
+        function openAddModal() { 
+            state.editingId = null; 
+            document.getElementById('modalTitle').textContent = "Tambah Produk";
+            document.getElementById('vImg').value = ''; 
             document.getElementById('vMerk').value = '';
-            document.getElementById('vTipe').value = '';
+            document.getElementById('vTipe').value = ''; 
             document.getElementById('vTahun').value = '';
             document.getElementById('vHarga').value = '';
+            document.getElementById('vehicleModal').classList.remove('hidden'); 
         }
+
+        function openEditModal(id) { 
+            state.editingId = id; 
+            const v = state.vehicles.find(x => x.id == id);
+            
+            if(!v) {
+                showToast("Data produk tidak ditemukan", "error");
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = "Edit Produk";
+            document.getElementById('vImg').value = v.img || ''; 
+            document.getElementById('vMerk').value = v.merk || '';
+            document.getElementById('vTipe').value = v.tipe || ''; 
+            document.getElementById('vTahun').value = v.tahun || '';
+            document.getElementById('vHarga').value = v.harga || '';
+            document.getElementById('vehicleModal').classList.remove('hidden');
+        }
+
+        function closeVehicleModal() { document.getElementById('vehicleModal').classList.add('hidden'); }
 
         async function saveVehicle() {
             const body = {
-                id: editingId || "ID" + Date.now(),
-                img: document.getElementById('vImg').value || 'https://via.placeholder.com/400x300?text=No+Image',
-                merk: document.getElementById('vMerk').value,
-                tipe: document.getElementById('vTipe').value,
-                tahun: document.getElementById('vTahun').value,
-                harga: parseInt(document.getElementById('vHarga').value) || 0,
+                id: state.editingId || "PRD" + Date.now(),
+                img: document.getElementById('vImg').value || 'https://placehold.co/400x300/1e293b/ffffff?text=Mobil',
+                merk: document.getElementById('vMerk').value, tipe: document.getElementById('vTipe').value,
+                tahun: document.getElementById('vTahun').value, harga: parseInt(document.getElementById('vHarga').value) || 0,
                 status: 'Ready'
             };
-            
-            const result = await fetchAPI('saveProduct', 'POST', body);
+            if(!body.merk || !body.tipe || !body.harga) return showToast("Mohon lengkapi form!", "error");
+            const result = await fetchAPI('saveProduct', body);
             if (result) {
-                closeVehicleModal();
-                await loadInitialData();
-                showAdminView('inventory');
+                showToast("Produk disimpan!"); closeVehicleModal();
+                const products = await fetchAPI('getProducts');
+                if (products) state.vehicles = products;
+                renderAdminInventory(); updateAdminStats();
             }
         }
 
         async function deleteVehicle(id) {
-            if(confirm("Hapus unit ini dari katalog?")) {
-                const result = await fetchAPI('deleteProduct', 'POST', { id: id });
+            if(confirm("Hapus produk ini dari katalog?")) {
+                const result = await fetchAPI('deleteProduct', { id: id });
                 if (result) {
-                    await loadInitialData();
-                    renderAdminInventory();
-                    updateAdminStats();
+                    showToast("Produk dihapus.");
+                    const products = await fetchAPI('getProducts');
+                    if (products) state.vehicles = products;
+                    renderAdminInventory(); updateAdminStats();
                 }
             }
+        }
+
+        function formatDate(dateStr) {
+            if(!dateStr) return '-';
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
         function logout() { location.reload(); }
